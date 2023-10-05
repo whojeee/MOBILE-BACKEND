@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _handleAddButton() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NewPage()),
+      MaterialPageRoute(builder: (context) => NewEventPage()),
     );
   }
 
