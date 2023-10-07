@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tugaskelompok/Pages/Loading.dart';
 import 'botnav.dart';
 import 'Pages/Calendar.dart';
 import 'HomePage.dart';
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: GetStart(),
+      home: LoadingPage(),
     );
   }
 }
