@@ -7,9 +7,16 @@ import 'Pages/GetStart.dart';
 import 'Drawer.dart';
 import 'Pages/Features.dart';
 import 'Pages/Category.dart';
+import 'Tools/Model/user_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => UserProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

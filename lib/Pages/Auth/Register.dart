@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../Tools/Model/user.dart'; // Import the User model
-import '../../Tools/Database/database_instance.dart'; // Import the DatabaseInstance class
+import 'package:provider/provider.dart';
+import 'package:tugaskelompok/Tools/Model/user.dart'; // Import your user model
+import 'package:tugaskelompok/Tools/Model/user_provider.dart'; // Import the UserProvider
 
 class RegistrationPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -9,21 +10,14 @@ class RegistrationPage extends StatelessWidget {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  final DatabaseInstance db =
-      DatabaseInstance(); // Create an instance of DatabaseInstance
-
-  void _handleRegistration() async {
+  void _handleRegistration(BuildContext context) {
     final username = usernameController.text;
     final email = emailController.text;
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
     try {
-      // Initialize the database
-      await db.init();
-
       if (password == confirmPassword) {
-        // Create a User object with premium set to false and name same as username
         final newUser = User(
           username: username,
           gmail: email,
@@ -32,25 +26,23 @@ class RegistrationPage extends StatelessWidget {
           nama: username,
         );
 
-        // Insert the new user into the database
-        await db.insert(newUser);
-
-        // Perform any other registration logic here
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.addUser(newUser);
 
         print('Registration successful');
-        print('User data saved to the database: $newUser');
+        print('User data added: $newUser');
       } else {
-        // Show an error message if passwords do not match
         print('Passwords do not match');
       }
     } catch (e) {
-      // Handle any database initialization or insertion errors
       print('Error during registration: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Registration Page'),
@@ -81,8 +73,23 @@ class RegistrationPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _handleRegistration,
+              onPressed: () => _handleRegistration(context),
               child: Text('Register'),
+            ),
+            SizedBox(height: 20),
+            Text('All Data Inside Provider:'),
+            Expanded(
+              child: ListView.builder(
+                itemCount: userProvider.users.length,
+                itemBuilder: (context, index) {
+                  final user = userProvider.users[index];
+                  return ListTile(
+                    title: Text(user.username ?? ''),
+                    subtitle: Text(user.gmail ?? ''),
+                    // You can display more user details as needed
+                  );
+                },
+              ),
             ),
           ],
         ),
