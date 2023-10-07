@@ -1,4 +1,4 @@
-import '../Model/users.dart';
+import '../Model/user.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -25,7 +25,7 @@ class DatabaseInstance {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $table (id INTEGER PRIMARY KEY, nim TEXT, nama TEXT)');
+        'CREATE TABLE $table (id INTEGER PRIMARY KEY, username TEXT, nama TEXT)');
   }
 
   Future insert(User row) async {
@@ -63,8 +63,8 @@ class DatabaseInstance {
   Future update(User row) async {
     try {
       print('ini di upadte');
-      await _database!
-          .update(table, row.toJson(), where: 'nim = ?', whereArgs: [row.nim]);
+      await _database!.update(table, row.toJson(),
+          where: 'username = ?', whereArgs: [row.username]);
     } catch (e) {
       print('error $e');
       rethrow;

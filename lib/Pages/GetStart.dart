@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tugaskelompok/Tools/Model/key_sharedpreference.dart';
+import 'package:tugaskelompok/Tools/Model/GetStart_FirstTime.dart';
 import 'package:tugaskelompok/main.dart';
 
 class GetStart extends StatefulWidget {

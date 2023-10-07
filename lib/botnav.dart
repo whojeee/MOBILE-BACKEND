@@ -4,14 +4,16 @@ class BottomNavBar extends StatelessWidget {
   final Function(int) onTabTapped;
   final int currentIndex;
 
-  BottomNavBar({required this.onTabTapped, required this.currentIndex});
+  const BottomNavBar(
+      {Key? key, required this.onTabTapped, required this.currentIndex})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       onTap: onTabTapped,
       currentIndex: currentIndex,
-      items: [
+      items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.list_alt),
           label: 'Planner',
@@ -19,6 +21,10 @@ class BottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.calendar_month),
           label: 'Calendar',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.view_compact_rounded),
+          label: 'Features',
         ),
       ],
     );
