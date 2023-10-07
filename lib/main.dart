@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'botnav.dart';
-import 'Calendar.dart';
+import 'Pages/Calendar.dart';
 import 'HomePage.dart';
-import 'NewEvent.dart';
-import 'GetStart.dart';
-import 'Category.dart';
+import 'Pages/NewEvent.dart';
+import 'Pages/GetStart.dart';
+import 'Pages/Category.dart';
 
 void main() {
   runApp(MyApp());

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tugaskelompok/utils/key_sharedpreference.dart';
-import 'main.dart';
+import 'package:tugaskelompok/Tools/Model/key_sharedpreference.dart';
+import 'package:tugaskelompok/main.dart';
 
 class GetStart extends StatefulWidget {
   const GetStart({super.key});
