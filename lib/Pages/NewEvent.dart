@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'event_provider.dart'; // Import your event provider
+import '../Tools/Model/event_model.dart';
 
 class NewEventPage extends StatefulWidget {
   @override
@@ -6,60 +11,43 @@ class NewEventPage extends StatefulWidget {
 }
 
 class _NewEventPageState extends State<NewEventPage> {
-  DateTime _selectedDate = DateTime.now();
-  TextEditingController _eventNameController = TextEditingController();
-  TextEditingController _eventDescriptionController = TextEditingController();
-  TextEditingController _selectedDayController = TextEditingController();
+  StreamController<int> _eventCountController = StreamController<int>();
+  Stream<int> get eventCountStream => _eventCountController.stream;
 
-  String? formattedDayOfWeek;
-  String? formattedDay;
-  String? formattedMonth;
-  String? formattedYear;
+  void _addEvent(BuildContext context) {
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    final eventName = eventProvider.eventNameController.text;
+    final eventDescription = eventProvider.eventDescriptionController.text;
+    final eventDate = eventProvider.selectedDate;
 
-  void _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+    // Add the event to the list
+    eventProvider.addEvent(
+      EventModel(
+        eventName: eventName,
+        eventDescription: eventDescription,
+        eventDate: eventDate,
+      ),
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        formattedDayOfWeek = _getDayOfWeek(picked.weekday);
-        formattedDay = picked.day.toString().padLeft(2, '0');
-        formattedMonth = picked.month.toString().padLeft(2, '0');
-        formattedYear = picked.year.toString();
 
-        _selectedDayController.text =
-            '$formattedDayOfWeek, $formattedDay - $formattedMonth - $formattedYear';
-      });
-    }
-  }
+    // Update the event count
+    int totalEventCount = eventProvider.events.length;
+    eventProvider.updateEventCount(totalEventCount);
 
-  String _getDayOfWeek(int day) {
-    switch (day) {
-      case 1:
-        return 'Monday';
-      case 2:
-        return 'Tuesday';
-      case 3:
-        return 'Wednesday';
-      case 4:
-        return 'Thursday';
-      case 5:
-        return 'Friday';
-      case 6:
-        return 'Saturday';
-      case 7:
-        return 'Sunday';
-      default:
-        return '';
-    }
+    // Navigate back to the previous page (HomePage) with the added event data
+    Navigator.pop(
+      context,
+      EventModel(
+        eventName: eventName,
+        eventDescription: eventDescription,
+        eventDate: eventDate,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final eventProvider = Provider.of<EventProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('New Event'),
@@ -69,22 +57,22 @@ class _NewEventPageState extends State<NewEventPage> {
         child: Column(
           children: [
             TextField(
-              controller: _eventNameController,
+              controller: eventProvider.eventNameController,
               decoration: InputDecoration(labelText: 'Event Name'),
             ),
             SizedBox(height: 10),
             TextField(
-              controller: _eventDescriptionController,
+              controller: eventProvider.eventDescriptionController,
               decoration: InputDecoration(labelText: 'Event Description'),
             ),
             SizedBox(height: 10),
             TextField(
-              controller: _selectedDayController,
+              controller: eventProvider.selectedDayController,
               readOnly: true,
               decoration: InputDecoration(
                 labelText: 'Selected Date',
                 suffixIcon: IconButton(
-                  onPressed: () => _selectDate(context),
+                  onPressed: () => eventProvider.selectDate(context),
                   icon: Icon(Icons.calendar_today),
                 ),
               ),
@@ -92,11 +80,7 @@ class _NewEventPageState extends State<NewEventPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                String eventName = _eventNameController.text;
-                String eventDescription = _eventDescriptionController.text;
-                DateTime eventDate = _selectedDate;
-
-                // Tambahkan logika untuk menyimpan event
+                _addEvent(context); // Call _addEvent method
               },
               child: Text('Create Event'),
             ),

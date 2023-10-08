@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'Pages/NewEvent.dart'; // Import your event provider
+import '../Tools/Model/event_model.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -23,6 +25,27 @@ class _HomePageState extends State<HomePage> {
         return '';
     }
   }
+
+  void _handleAddButton(BuildContext context) async {
+    final addedEvent = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NewEventPage(),
+      ),
+    );
+
+    // If an event was added, you can use it as needed
+    if (addedEvent != null) {
+      setState(() {
+        // Update your UI to display the added event
+        // Here, we assume you have a list of events
+        // and we add the added event to that list
+        events.add(addedEvent);
+      });
+    }
+  }
+
+  List<EventModel> events = []; // Maintain a list of events
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +89,31 @@ class _HomePageState extends State<HomePage> {
             child: PageView(
               controller: pageController,
               children: <Widget>[
+                // You can add different pages here
                 Center(child: Text('Today Page')),
                 Center(child: Text('Week Page')),
                 Center(child: Text('Month Page')),
                 Center(child: Text('Year Page')),
               ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _handleAddButton(context);
+            },
+            child: Text('Add Event'),
+          ),
+          // Display the added events in a list or another suitable way
+          Expanded(
+            child: ListView.builder(
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(events[index].eventName),
+                  subtitle: Text(events[index].eventDescription),
+                  // Add more event details as needed
+                );
+              },
             ),
           ),
         ],
