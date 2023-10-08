@@ -24,7 +24,7 @@ class _GetStartState extends State<GetStart> {
     String description,
     String imagePath,
     VoidCallback onPressed,
-    String buttonText, // Tambahkan argumen untuk teks tombol
+    String buttonText,
   ) {
     return Container(
       color: Colors.blue[50],
@@ -41,7 +41,7 @@ class _GetStartState extends State<GetStart> {
             Text(
               title,
               style: TextStyle(
-                fontSize: 24.0,
+                fontSize: 20.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -63,7 +63,7 @@ class _GetStartState extends State<GetStart> {
                 padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 16.0),
               ),
               child: Text(
-                buttonText, // Menggunakan teks dari argumen
+                buttonText,
                 style: TextStyle(
                   fontSize: 18.0,
                 ),
@@ -82,14 +82,14 @@ class _GetStartState extends State<GetStart> {
         controller: _pageController,
         children: [
           _buildPage(
-            'Welcome to DayMinder!',
+            'Welcome to Daily Minder!',
             'Get started and explore our amazing features!',
             'assets/images/bg.png',
             () => _pageController.nextPage(
               duration: Duration(milliseconds: 300),
               curve: Curves.easeInOut,
             ),
-            'Next', // Tambahkan teks tombol untuk halaman pertama
+            'Next',
           ),
           _buildPage(
             'Explore Amazing Features',
@@ -99,7 +99,7 @@ class _GetStartState extends State<GetStart> {
               duration: Duration(milliseconds: 300),
               curve: Curves.easeInOut,
             ),
-            'Next', // Tambahkan teks tombol untuk halaman kedua
+            'Next',
           ),
           _buildPage(
             'Manage your time, achieve your dreams!',
@@ -112,11 +112,11 @@ class _GetStartState extends State<GetStart> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MyHomePage(title: "DayMinder"),
+                  builder: (context) => MyHomePage(title: "Daily Minder"),
                 ),
               );
             },
-            'Get Started', // Teks tombol untuk halaman ketiga
+            'Get Started',
           ),
         ],
       ),

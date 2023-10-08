@@ -31,7 +31,7 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50], // Atur warna latar belakang di sini
+      backgroundColor: Colors.blue[50],
       body: Center(
         child: Image.asset(
           'assets/images/Loading.png',
