@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'Pages/NewEvent.dart'; // Import your event provider
+import 'package:intl/intl.dart';
+import 'Pages/NewEvent.dart';
 import '../Tools/Model/event_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,18 +35,14 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    // If an event was added, you can use it as needed
     if (addedEvent != null) {
       setState(() {
-        // Update your UI to display the added event
-        // Here, we assume you have a list of events
-        // and we add the added event to that list
         events.add(addedEvent);
       });
     }
   }
 
-  List<EventModel> events = []; // Maintain a list of events
+  List<EventModel> events = [];
 
   @override
   Widget build(BuildContext context) {
@@ -89,12 +86,79 @@ class _HomePageState extends State<HomePage> {
             child: PageView(
               controller: pageController,
               children: <Widget>[
-                // You can add different pages here
-                Center(child: Text('Today Page')),
-                Center(child: Text('Week Page')),
-                Center(child: Text('Month Page')),
-                Center(child: Text('Year Page')),
+                Center(), // Empty Container for Today Page
+                Center(), // Empty Container for Week Page
+                Center(), // Empty Container for Month Page
+                Center(), // Empty Container for Year Page
               ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                String formattedDate = DateFormat('EEEE, d - MM - y')
+                    .format(events[index].eventDate);
+
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      events[index].isChecked = !events[index].isChecked;
+                    });
+                  },
+                  child: Card(
+                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: events[index].isChecked,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                events[index].isChecked = value!;
+                              });
+                            },
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      events[index].eventName,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      formattedDate,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  events[index].eventDescription,
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           ElevatedButton(
@@ -102,19 +166,6 @@ class _HomePageState extends State<HomePage> {
               _handleAddButton(context);
             },
             child: Text('Add Event'),
-          ),
-          // Display the added events in a list or another suitable way
-          Expanded(
-            child: ListView.builder(
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(events[index].eventName),
-                  subtitle: Text(events[index].eventDescription),
-                  // Add more event details as needed
-                );
-              },
-            ),
           ),
         ],
       ),

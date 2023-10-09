@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'event_provider.dart'; // Import your event provider
+import 'event_provider.dart';
 import '../Tools/Model/event_model.dart';
 
 class NewEventPage extends StatefulWidget {
@@ -20,7 +20,6 @@ class _NewEventPageState extends State<NewEventPage> {
     final eventDescription = eventProvider.eventDescriptionController.text;
     final eventDate = eventProvider.selectedDate;
 
-    // Add the event to the list
     eventProvider.addEvent(
       EventModel(
         eventName: eventName,
@@ -29,11 +28,9 @@ class _NewEventPageState extends State<NewEventPage> {
       ),
     );
 
-    // Update the event count
     int totalEventCount = eventProvider.events.length;
     eventProvider.updateEventCount(totalEventCount);
 
-    // Navigate back to the previous page (HomePage) with the added event data
     Navigator.pop(
       context,
       EventModel(
@@ -80,7 +77,7 @@ class _NewEventPageState extends State<NewEventPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _addEvent(context); // Call _addEvent method
+                _addEvent(context);
               },
               child: Text('Create Event'),
             ),

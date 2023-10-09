@@ -29,7 +29,6 @@ class EventProvider with ChangeNotifier {
   String? formattedMonth;
   String? formattedYear;
 
-  // Getter methods for accessing the state
   DateTime get selectedDate => _selectedDate;
   TextEditingController get eventNameController => _eventNameController;
   TextEditingController get eventDescriptionController =>
@@ -86,14 +85,9 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Add your logic to save the event
   void saveEvent() {
     String eventName = _eventNameController.text;
     String eventDescription = _eventDescriptionController.text;
     DateTime eventDate = _selectedDate;
-
-    // Tambahkan logika untuk menyimpan event
-    // You can implement the logic to save the event here
-    // For example, add it to a list or a database
   }
 }

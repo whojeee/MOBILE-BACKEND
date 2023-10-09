@@ -10,15 +10,6 @@ import 'Tools/Model/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'Pages/event_provider.dart';
 
-// void main() {
-//   runApp(
-//     ChangeNotifierProvider(
-//       create: (context) => UserProvider(),
-//       child: MyApp(),
-//     ),
-//   );
-// }
-
 void main() {
   runApp(
     MultiProvider(
@@ -27,7 +18,7 @@ void main() {
           create: (context) => UserProvider(),
         ),
         ChangeNotifierProvider(
-          create: (context) => EventProvider(), // Add your event provider
+          create: (context) => EventProvider(),
         ),
       ],
       child: MyApp(),
@@ -67,7 +58,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    // Listen to the event count stream here and update the state
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
     eventProvider.eventCountStream.listen((eventCount) {
       setState(() {
@@ -89,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  int _eventCount = 0; // Store the event count here
+  int _eventCount = 0;
 
   @override
   Widget build(BuildContext context) {
