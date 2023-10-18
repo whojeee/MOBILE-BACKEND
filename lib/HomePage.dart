@@ -38,6 +38,8 @@ class _HomePageState extends State<HomePage> {
     if (addedEvent != null) {
       setState(() {
         events.add(addedEvent);
+        events.sort((a, b) =>
+            a.eventDate.compareTo(b.eventDate)); // Sort events by date
       });
     }
   }
@@ -48,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
             height: 50,
@@ -82,17 +85,8 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-          Expanded(
-            child: PageView(
-              controller: pageController,
-              children: <Widget>[
-                Center(), // Empty Container for Today Page
-                Center(), // Empty Container for Week Page
-                Center(), // Empty Container for Month Page
-                Center(), // Empty Container for Year Page
-              ],
-            ),
-          ),
+
+          SizedBox(height: 16), // Added space between PageView and events list
           Expanded(
             child: ListView.builder(
               itemCount: events.length,
@@ -161,13 +155,16 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              _handleAddButton(context);
-            },
-            child: Text('Add Event'),
-          ),
         ],
+      ),
+      floatingActionButton: Align(
+        alignment: Alignment.bottomRight,
+        child: FloatingActionButton(
+          onPressed: () {
+            _handleAddButton(context);
+          },
+          child: Icon(Icons.create),
+        ),
       ),
     );
   }

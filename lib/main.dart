@@ -127,21 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
         onTabTapped: onTabTapped,
         currentIndex: _currentIndex,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: Transform.scale(
-        scale: 1.2,
-        child: Container(
-          margin: EdgeInsets.only(right: 5, bottom: 5),
-          child: FloatingActionButton(
-            onPressed: _handleAddButton,
-            tooltip: 'Add Plan',
-            child: Icon(
-              Icons.create,
-              size: 24,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
