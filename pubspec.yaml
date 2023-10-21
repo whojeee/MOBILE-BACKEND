@@ -38,7 +38,8 @@ dependencies:
   shared_preferences: ^2.2.1
   path:
   provider:
-  intl: ^0.18.1
+  intl:
+  http:
 
 dev_dependencies:
   flutter_test:
