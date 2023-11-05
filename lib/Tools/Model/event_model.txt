@@ -1,0 +1,14 @@
+class EventModel {
+  final String eventName;
+  final String eventDescription;
+  final DateTime eventDate;
+  final String createdBy;
+  bool isChecked;
+
+  EventModel(
+      {required this.eventName,
+      required this.eventDescription,
+      required this.eventDate,
+      required this.createdBy,
+      this.isChecked = false});
+}

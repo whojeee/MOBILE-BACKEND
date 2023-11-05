@@ -40,6 +40,7 @@ dependencies:
   provider:
   intl:
   http:
+  sqflite:
 
 dev_dependencies:
   flutter_test:
