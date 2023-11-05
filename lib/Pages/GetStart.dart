@@ -10,12 +10,28 @@ class GetStart extends StatefulWidget {
   State<GetStart> createState() => _GetStartState();
 }
 
+void checkOnboardingStatus(BuildContext context) async {
+  SharedPreferences _pref = await SharedPreferences.getInstance();
+  bool hasCompletedOnboarding = _pref.getBool(KeyStore.pernahMasuk) ?? false;
+
+  if (hasCompletedOnboarding) {
+    // If onboarding is completed, navigate to the main screen.
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyHomePage(title: "Daily Minder"),
+      ),
+    );
+  }
+}
+
 class _GetStartState extends State<GetStart> {
   late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    checkOnboardingStatus(context);
     _pageController = PageController();
   }
 
