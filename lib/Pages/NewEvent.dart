@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
-import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
 class NewEventPage extends StatefulWidget {
   @override

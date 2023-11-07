@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:async';
+import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
 class DatabaseHelper {
   DatabaseHelper._privateConstructor();
@@ -60,10 +61,16 @@ class DatabaseHelper {
     return await db.insert('events', row);
   }
 
-  Future<List<Map<String, dynamic>>> queryAllEvents() async {
+  Future<List<EventModel>> queryAllEvents() async {
     final db = await instance.database;
-    return await db.query('events');
+    final result = await db.query('events');
+    return result.map((e) => EventModel.fromMap(e)).toList();
   }
+
+  // Future<List<Map<String, dynamic>>> queryAllEvents() async {
+  //   final db = await instance.database;
+  //   return await db.query('events');
+  // }
 
   Future<int> updateEvent(Map<String, dynamic> row) async {
     final db = await instance.database;
@@ -77,3 +84,16 @@ class DatabaseHelper {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 }
+
+// Future<List<Map<String, dynamic>>?> queryAllEvents() async {
+//   // Assuming you have a database reference named 'db'.
+//   final db = await openDatabase('your_database.db');
+
+//   // Query all events from the database.
+//   final List<Map<String, dynamic>> result = await db.query('events');
+
+//   // Close the database.
+//   await db.close();
+
+//   return result;
+// }
