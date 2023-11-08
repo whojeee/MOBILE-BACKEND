@@ -41,6 +41,11 @@ dependencies:
   intl:
   http:
   sqflite:
+  firebase_core:
+  firebase_auth:
+  flutter_login:
+  font_awesome_flutter:
+  google_sign_in:
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'Pages/Auth/Register.dart';
+// import 'Pages/Auth/Register.dart';
+import 'Pages/Auth/Login.dart';
 
 class MyDrawer extends StatelessWidget {
+  String? email;
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -9,9 +12,8 @@ class MyDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text("Anonymous"), // Replace with user's name
-            accountEmail:
-                Text("Anonymous@example.com"), // Replace with user's email
+            accountName: Text("Welcome"), // Replace with user's name
+            accountEmail: Text("$email"), // Replace with user's email
             currentAccountPicture: CircleAvatar(
               // Replace with user's profile picture
               backgroundColor: Colors.white,
@@ -42,12 +44,11 @@ class MyDrawer extends StatelessWidget {
           Divider(),
           ListTile(
             leading: Icon(Icons.person),
-            title: Text('Register'), // Change the text to "Register"
+            title: Text('Login'),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) =>
-                      RegistrationPage(), // Navigate to your registration page
+                  builder: (context) => LoginScreen(),
                 ),
               );
             },

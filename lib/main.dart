@@ -9,8 +9,11 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -46,15 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _loadEventCount();
-  }
-
-  Future<void> _loadEventCount() async {
-    DatabaseHelper.instance.eventCountStream.listen((count) {
-      setState(() {
-        eventCount = count;
-      });
-    });
   }
 
   void onTabTapped(int index) {
@@ -74,29 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
             Stack(
               children: [
                 Icon(Icons.notifications),
-                if (eventCount > 0)
-                  Positioned(
-                    right: 0,
-                    child: Container(
-                      padding: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red,
-                      ),
-                      constraints: BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Text(
-                        eventCount.toString(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ],

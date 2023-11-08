@@ -19,7 +19,9 @@ void checkOnboardingStatus(BuildContext context) async {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => MyHomePage(title: "Daily Minder"),
+        builder: (context) => MyHomePage(
+          title: "Daily Minder",
+        ),
       ),
     );
   }
