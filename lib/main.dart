@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,13 @@ class _MyHomePageState extends State<MyHomePage> {
   int eventCount = 0;
 
   final List<Widget> _children = [HomePage(), CalendarPage(), Features()];
+  StreamController<int> myNotificationStreamController =
+      StreamController<int>.broadcast();
+  @override
+  void dispose() {
+    myNotificationStreamController.close();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -65,11 +73,31 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Text(widget.title),
             SizedBox(width: 10),
-            Stack(
-              children: [
-                Icon(Icons.notifications),
-              ],
-            ),
+            StreamBuilder<int>(
+              stream: DatabaseHelper.instance.eventCountStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data! > 0) {
+                  return Stack(
+                    children: [
+                      Icon(Icons.notifications),
+                      Positioned(
+                        right: 0,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.red,
+                          radius: 8,
+                          child: Text(
+                            snapshot.data.toString(),
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return Icon(Icons.notifications);
+                }
+              },
+            )
           ],
         ),
       ),
@@ -94,11 +122,23 @@ class _HomePageState extends State<HomePage> {
   int eventCount = 0;
   List<EventModel> events = [];
   bool _isNewEventAdded = false;
+  StreamController<int> notificationStreamController = StreamController<int>();
+  Stream<int> get notificationStream => notificationStreamController.stream;
+  Sink<int> get notificationSink => notificationStreamController.sink;
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+    _loadEventCount(); // Memanggil _loadEventCount() untuk mengaktifkan stream
+    DatabaseHelper.instance.initEventCountStream();
+    _loadEventCount();
+  }
 
   Future<void> _loadEventCount() async {
     DatabaseHelper.instance.eventCountStream.listen((count) {
       setState(() {
         eventCount = count;
+        notificationSink.add(count); // Mengirim jumlah notifikasi ke stream
       });
     });
   }
@@ -226,6 +266,7 @@ class _HomePageState extends State<HomePage> {
       _loadEventCount();
       _isNewEventAdded = true;
     }
+    _isNewEventAdded = false; // Tambahkan ini di akhir metode
   }
 
   void _handleCheckboxChanged(int index, bool value) {
@@ -238,20 +279,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Contoh pemanggilan updateEventCount() saat menambahkan acara baru
   void _handleNewEventAdded(EventModel addedEvent) {
     setState(() {
       events.add(addedEvent);
       events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-      _isNewEventAdded = true;
     });
-    _loadEventCount();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadEvents();
-    _loadEventCount();
+    DatabaseHelper.instance.updateEventCount(); // Memperbarui jumlah acara
+    notificationSink.add(eventCount + 1); // Mengirim notifikasi baru ke stream
   }
 
   @override
