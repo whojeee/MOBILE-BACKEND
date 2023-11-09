@@ -83,7 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-//////////////////////////////////////////////////////////////////
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -94,6 +93,7 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
   int eventCount = 0;
   List<EventModel> events = [];
+  bool _isNewEventAdded = false;
 
   Future<void> _loadEventCount() async {
     DatabaseHelper.instance.eventCountStream.listen((count) {
@@ -120,14 +120,131 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadEvents() async {
     final eventsData = await DatabaseHelper.instance.queryAllEvents();
+
     if (eventsData != null) {
+      eventsData.sort((a, b) => a.eventDate.compareTo(b.eventDate));
       setState(() {
-        this.events = eventsData
-            .map((eventData) =>
-                EventModel.fromMap(eventData as Map<String, dynamic>))
-            .toList();
+        this.events = eventsData;
       });
     }
+  }
+
+  Widget _buildBody() {
+    return events.isEmpty
+        ? Center(child: Text('No events available.'))
+        : ListView.builder(
+            itemCount: events.length,
+            itemBuilder: (context, index) {
+              String formattedDate = DateFormat('EEEE, d - MM - y')
+                  .format(DateTime.parse(events[index].eventDate));
+
+              return events[index].isChecked
+                  ? SizedBox.shrink()
+                  : InkWell(
+                      onTap: () {
+                        setState(() {
+                          events[index].isChecked = !events[index].isChecked;
+                        });
+                      },
+                      child: Card(
+                        margin:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: events[index].isChecked,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _handleCheckboxChanged(index, value!);
+                                  });
+                                },
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          events[index].eventName,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Text(
+                                          formattedDate,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      events[index].eventDescription,
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+            },
+          );
+  }
+
+  void _handleAddButton() async {
+    if (_isNewEventAdded) {
+      return;
+    }
+
+    final addedEvent = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NewEventPage(
+          onNewEventAdded: _handleNewEventAdded,
+        ),
+      ),
+    );
+
+    if (addedEvent != null && !_isNewEventAdded) {
+      await DatabaseHelper.instance.insertEvent(addedEvent.toMap());
+      setState(() {
+        events.add(addedEvent);
+        events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+      });
+      _loadEventCount();
+      _isNewEventAdded = true;
+    }
+  }
+
+  void _handleCheckboxChanged(int index, bool value) {
+    setState(() {
+      events[index].isChecked = value;
+      if (value) {
+        events.removeAt(index);
+      }
+      events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+    });
+  }
+
+  void _handleNewEventAdded(EventModel addedEvent) {
+    setState(() {
+      events.add(addedEvent);
+      events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+      _isNewEventAdded = true;
+    });
+    _loadEventCount();
   }
 
   @override
@@ -135,24 +252,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _loadEvents();
     _loadEventCount();
-  }
-
-  void _handleAddButton() async {
-    final addedEvent = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => NewEventPage()),
-    );
-
-    if (addedEvent != null) {
-      await DatabaseHelper.instance.insertEvent(addedEvent.toMap());
-      setState(() {
-        events.add(addedEvent);
-        events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-      });
-      _loadEventCount();
-      // After adding the event, navigate back to the home page.
-      Navigator.pop(context);
-    }
   }
 
   @override
@@ -163,97 +262,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     return Scaffold(
-      body: FutureBuilder<List<EventModel>?>(
-        future: DatabaseHelper.instance.queryAllEvents(),
-        initialData: [],
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // You can replace this with a loading indicator
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else if (!snapshot.hasData) {
-            return Text('No events available.');
-          } else {
-            events = snapshot.data!;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: events.length,
-                    itemBuilder: (context, index) {
-                      String formattedDate = DateFormat('EEEE, d - MM - y')
-                          .format(DateTime.parse(events[index].eventDate));
-
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            events[index].isChecked = !events[index].isChecked;
-                          });
-                        },
-                        child: Card(
-                          margin:
-                              EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                          child: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Row(
-                              children: [
-                                Checkbox(
-                                  value: events[index].isChecked,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      events[index].isChecked = value!;
-                                    });
-                                  },
-                                ),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            events[index].eventName,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          Text(
-                                            formattedDate,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        events[index].eventDescription,
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          }
-        },
-      ),
+      body: _buildBody(),
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: FloatingActionButton(

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
+import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
 class NewEventPage extends StatefulWidget {
+  final Function(EventModel) onNewEventAdded; // Tambahkan ini
+
+  NewEventPage({required this.onNewEventAdded});
   @override
   _NewEventPageState createState() => _NewEventPageState();
 }
@@ -28,33 +32,18 @@ class _NewEventPageState extends State<NewEventPage> {
     final createdBy = eventCreatedByController.text;
     final eventDate = selectedDate.toIso8601String();
 
-    final event = {
-      'eventName': eventName,
-      'eventDescription': eventDescription,
-      'eventDate': eventDate,
-      'createdBy': createdBy,
-      'isChecked': 0,
-    };
+    final event = EventModel(
+      eventName: eventName,
+      eventDescription: eventDescription,
+      eventDate: eventDate,
+      createdBy: createdBy,
+      isChecked: false, // Default value for isChecked
+    );
 
     try {
-      final id = await DatabaseHelper.instance.insertEvent(event);
-
-      Navigator.pop(context);
-      // if (id != null) {
-      //   final newEvent = EventModel(
-      //     eventName: eventName,
-      //     eventDescription: eventDescription,
-      //     eventDate: eventDate,
-      //     createdBy: createdBy,
-      //     isChecked: false,
-      //   );
-      //   // await printEventData();
-
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(content: Text('Failed to create the event')),
-      //   );
-      // }
+      await DatabaseHelper.instance.insertEvent(event.toMap());
+      Navigator.pop(context, event);
+      widget.onNewEventAdded(event);
     } catch (error) {
       print('Database insertion error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,19 +51,6 @@ class _NewEventPageState extends State<NewEventPage> {
       );
     }
   }
-
-  // Future<void> printEventData() async {
-  //   final events = await DatabaseHelper.instance.queryAllEvents();
-  //   for (var event in events) {
-  //     print('Event ID: ${event['id']}');
-  //     print('Event Name: ${event['eventName']}');
-  //     print('Event Description: ${event['eventDescription']}');
-  //     print('Event Date: ${event['eventDate']}');
-  //     print('Created By: ${event['createdBy']}');
-  //     print('Is Checked: ${event['isChecked'] == 1}');
-  //     print('-------------------------------');
-  //   }
-  // }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -141,13 +117,4 @@ class _NewEventPageState extends State<NewEventPage> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(
-    MaterialApp(
-      scaffoldMessengerKey: GlobalKey<ScaffoldMessengerState>(),
-      home: NewEventPage(),
-    ),
-  );
 }
