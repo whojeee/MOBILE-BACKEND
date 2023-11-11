@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tugaskelompok/Pages/Auth/Login.dart';
 import 'package:tugaskelompok/Pages/Loading.dart';
+import 'Pages/Auth/auth.dart';
 import 'botnav.dart';
 import 'Pages/Calendar.dart';
 import 'package:tugaskelompok/Pages/NewEvent.dart';
@@ -44,25 +46,35 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
   int eventCount = 0;
+  late AuthFirebase auth;
 
   final List<Widget> _children = [HomePage(), CalendarPage(), Features()];
   StreamController<int> myNotificationStreamController =
       StreamController<int>.broadcast();
   @override
   void dispose() {
-    myNotificationStreamController.close();
     super.dispose();
+    myNotificationStreamController.close();
   }
 
   @override
   void initState() {
     super.initState();
+    auth = AuthFirebase();
   }
 
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void _logout() async {
+    await auth.logout();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
   }
 
   @override
@@ -101,7 +113,10 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      drawer: MyDrawer(),
+      drawer: MyDrawer(
+        email: "user@example.com",
+        logoutCallback: _logout,
+      ),
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavBar(
         onTabTapped: onTabTapped,
@@ -125,13 +140,16 @@ class _HomePageState extends State<HomePage> {
   StreamController<int> notificationStreamController = StreamController<int>();
   Stream<int> get notificationStream => notificationStreamController.stream;
   Sink<int> get notificationSink => notificationStreamController.sink;
+
   @override
   void initState() {
     super.initState();
     _loadEvents();
-    _loadEventCount(); // Memanggil _loadEventCount() untuk mengaktifkan stream
-    DatabaseHelper.instance.initEventCountStream();
-    _loadEventCount();
+    DatabaseHelper.instance.eventCountStream.listen((count) {
+      setState(() {
+        eventCount = count;
+      });
+    });
   }
 
   Future<void> _loadEventCount() async {
@@ -160,7 +178,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadEvents() async {
     final eventsData = await DatabaseHelper.instance.queryAllEvents();
-
+    print('loaded events : $eventsData');
     if (eventsData != null) {
       eventsData.sort((a, b) => a.eventDate.compareTo(b.eventDate));
       setState(() {
@@ -180,62 +198,54 @@ class _HomePageState extends State<HomePage> {
 
               return events[index].isChecked
                   ? SizedBox.shrink()
-                  : InkWell(
-                      onTap: () {
-                        setState(() {
-                          events[index].isChecked = !events[index].isChecked;
-                        });
-                      },
-                      child: Card(
-                        margin:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                        child: Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                value: events[index].isChecked,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    _handleCheckboxChanged(index, value!);
-                                  });
-                                },
-                              ),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          events[index].eventName,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
+                  : Card(
+                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: events[index].isChecked,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _handleCheckboxChanged(index, value!);
+                                });
+                              },
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        events[index].eventName,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                         ),
-                                        Text(
-                                          formattedDate,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
+                                      ),
+                                      Text(
+                                        formattedDate,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
                                         ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      events[index].eventDescription,
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                  ],
-                                ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    events[index].eventDescription,
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -244,10 +254,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleAddButton() async {
-    if (_isNewEventAdded) {
-      return;
-    }
-
     final addedEvent = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -257,36 +263,46 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    if (addedEvent != null && !_isNewEventAdded) {
+    if (addedEvent != null) {
       await DatabaseHelper.instance.insertEvent(addedEvent.toMap());
       setState(() {
         events.add(addedEvent);
         events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+        DatabaseHelper.instance.updateEventCount();
       });
-      _loadEventCount();
-      _isNewEventAdded = true;
     }
-    _isNewEventAdded = false; // Tambahkan ini di akhir metode
   }
 
-  void _handleCheckboxChanged(int index, bool value) {
+  void _handleCheckboxChanged(int index, bool value) async {
+    print('Checkbos changed :$index,$value');
+    if (value && events[index].id != null) {
+      print("Deleting event with ID: ${events[index].id}");
+      // Hapus event dari database
+      await DatabaseHelper.instance.deleteEvent(events[index].id!);
+
+      // Update jumlah notifikasi
+      DatabaseHelper.instance.updateEventCount();
+    }
+
     setState(() {
       events[index].isChecked = value;
+
       if (value) {
+        // Hapus event dari list jika checkbox dicentang
         events.removeAt(index);
       }
+
       events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     });
   }
 
-  // Contoh pemanggilan updateEventCount() saat menambahkan acara baru
   void _handleNewEventAdded(EventModel addedEvent) {
     setState(() {
       events.add(addedEvent);
       events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     });
-    DatabaseHelper.instance.updateEventCount(); // Memperbarui jumlah acara
-    notificationSink.add(eventCount + 1); // Mengirim notifikasi baru ke stream
+
+    DatabaseHelper.instance.updateEventCount();
   }
 
   @override

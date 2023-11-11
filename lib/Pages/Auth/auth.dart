@@ -1,31 +1,40 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthFirebase {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<String?> signup(String email, String password) async {
-    UserCredential authResult = await _firebaseAuth
-        .createUserWithEmailAndPassword(email: email, password: password);
-    User? user = authResult.user;
-    return user?.uid;
+  Future<User?> getUser() async {
+    return _auth.currentUser;
   }
 
-  Future<String?> login(String email, String password) async {
+  Future<UserCredential?> login(String email, String password) async {
     try {
-      UserCredential authResult = await _firebaseAuth
-          .signInWithEmailAndPassword(email: email, password: password);
-      User? user = authResult.user;
-      return user?.uid;
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return userCredential;
     } catch (e) {
-      print(e.toString());
+      print("Login error: $e");
       return null;
     }
   }
 
-  Future<User?> getUser() async {
-    User? user = await _firebaseAuth.currentUser;
-    return user;
+  Future<void> logout() async {
+    await _auth.signOut();
+  }
+
+  Future<UserCredential?> signup(String email, String password) async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return userCredential;
+    } catch (e) {
+      print("Signup error: $e");
+      return null;
+    }
   }
 }

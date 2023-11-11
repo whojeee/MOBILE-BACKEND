@@ -37,13 +37,13 @@ class _NewEventPageState extends State<NewEventPage> {
       eventDescription: eventDescription,
       eventDate: eventDate,
       createdBy: createdBy,
-      isChecked: false, // Default value for isChecked
+      isChecked: false,
     );
 
     try {
       await DatabaseHelper.instance.insertEvent(event.toMap());
-      Navigator.pop(context, event);
       widget.onNewEventAdded(event);
+      Navigator.pop(context);
     } catch (error) {
       print('Database insertion error: $error');
       ScaffoldMessenger.of(context).showSnackBar(

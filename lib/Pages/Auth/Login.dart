@@ -9,6 +9,8 @@ class LoginScreen extends StatefulWidget {
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
+
+  void _logout() {}
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -59,20 +61,21 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => MyHomePage(title: "Daily Minder")),
+          builder: (context) => MyHomePage(title: "Daily Minder"),
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Login Gagal"),
+          content: Text("Login Gagal. Periksa kembali username dan password."),
           action: SnackBarAction(
-            label: "ok",
+            label: "OK",
             onPressed: () {},
           ),
         ),
       );
     }
-    return null;
+    return "Gagal melakukan login"; // Mengembalikan pesan kesalahan
   }
 
   Future<String>? _recoverPassword(String name) {
@@ -85,7 +88,8 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => MyHomePage(title: "Daily Minder")),
+          builder: (context) => MyHomePage(title: "Daily Minder"),
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -98,7 +102,15 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     }
-    return null;
+    return "Gagal melakukan signup"; // Mengembalikan pesan kesalahan
+  }
+
+  Future<void> _logout() async {
+    await auth.logout();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
   }
 
   // Future<String>? _onLoginGoogle() {

@@ -7,6 +7,7 @@ class EventModel {
   bool isChecked;
 
   EventModel({
+    this.id,
     required this.eventName,
     required this.eventDescription,
     required this.eventDate,
@@ -16,6 +17,7 @@ class EventModel {
 
   factory EventModel.fromMap(Map<String, dynamic> map) {
     return EventModel(
+      id: map['id'], // Pastikan properti id diisi dengan nilai dari map
       eventName: map['eventName'],
       eventDescription: map['eventDescription'],
       eventDate: map['eventDate'],

@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'Pages/Auth/Login.dart';
 
 class MyDrawer extends StatelessWidget {
-  String? email;
+  final String? email;
+  final VoidCallback _logoutCallback;
+
+  MyDrawer({required this.email, required VoidCallback logoutCallback})
+      : _logoutCallback = logoutCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +19,6 @@ class MyDrawer extends StatelessWidget {
             accountName: Text("Welcome"), // Replace with user's name
             accountEmail: Text("$email"), // Replace with user's email
             currentAccountPicture: CircleAvatar(
-              // Replace with user's profile picture
               backgroundColor: Colors.white,
               child: Icon(Icons.person, size: 48),
             ),
@@ -51,6 +54,14 @@ class MyDrawer extends StatelessWidget {
                   builder: (context) => LoginScreen(),
                 ),
               );
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text('Logout'),
+            onTap: () {
+              _logoutCallback(); // Panggil fungsi logout saat Logout diklik
             },
           ),
         ],
