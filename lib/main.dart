@@ -36,8 +36,11 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final String title;
+  final String? email;
 
-  const MyHomePage({required this.title});
+  const MyHomePage({Key? key, required this.title, this.email});
+
+  // const MyHomePage({required this.title});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -114,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       drawer: MyDrawer(
-        email: "user@example.com",
+        email: widget.email ?? "user@example.com",
         logoutCallback: _logout,
       ),
       body: _children[_currentIndex],

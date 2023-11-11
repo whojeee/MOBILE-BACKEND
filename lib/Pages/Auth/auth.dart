@@ -7,6 +7,17 @@ class AuthFirebase {
     return _auth.currentUser;
   }
 
+  Future<Map<String, String>?> getUserDetails() async {
+    User? user = await getUser();
+    if (user != null) {
+      return {
+        'email': user.email ?? '',
+        // 'uid': user.uid,
+      };
+    }
+    return null;
+  }
+
   Future<UserCredential?> login(String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(

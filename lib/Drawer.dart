@@ -44,18 +44,18 @@ class MyDrawer extends StatelessWidget {
               // Handle "Events" feature
             },
           ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Login'),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => LoginScreen(),
-                ),
-              );
-            },
-          ),
+          // Divider(),
+          // ListTile(
+          //   leading: Icon(Icons.person),
+          //   title: Text('Login'),
+          //   onTap: () {
+          //     Navigator.of(context).push(
+          //       MaterialPageRoute(
+          //         builder: (context) => LoginScreen(),
+          //       ),
+          //     );
+          //   },
+          // ),
           Divider(),
           ListTile(
             leading: Icon(Icons.person),

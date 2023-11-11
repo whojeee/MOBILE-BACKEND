@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tugaskelompok/Tools/Model/GetStart_FirstTime.dart';
 import 'package:tugaskelompok/main.dart';
+import 'package:tugaskelompok/Pages/Auth/Login.dart';
 
 class GetStart extends StatefulWidget {
   const GetStart({Key? key}) : super(key: key);
@@ -19,9 +20,7 @@ void checkOnboardingStatus(BuildContext context) async {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => MyHomePage(
-          title: "Daily Minder",
-        ),
+        builder: (context) => LoginScreen(),
       ),
     );
   }
@@ -130,7 +129,8 @@ class _GetStartState extends State<GetStart> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MyHomePage(title: "Daily Minder"),
+                  // builder: (context) => MyHomePage(title: "Daily Minder"),
+                  builder: (context) => LoginScreen(),
                 ),
               );
             },

@@ -15,17 +15,25 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late AuthFirebase auth;
-
+  String? userEmail;
+  
   @override
   void initState() {
     super.initState();
     auth = AuthFirebase();
     auth.getUser().then((value) {
       if (value != null) {
+        auth.getUserDetails().then((details) {
+          if (details != null) {
+            setState(() {
+              userEmail = details['email'];
+            });
+          }
+        });
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MyHomePage(title: "Daily Minder"),
+            builder: (context) => MyHomePage(title: "Daily Minder", email: userEmail),
           ),
         );
       }
@@ -58,10 +66,17 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<String?> _loginUser(LoginData data) async {
     final result = await auth.login(data.name, data.password);
     if (result != null) {
+    auth.getUserDetails().then((details) {
+      if (details != null) {
+        setState(() {
+          userEmail = details['email'];
+        });
+      }
+    });
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MyHomePage(title: "Daily Minder"),
+          builder: (context) => MyHomePage(title: "Daily Minder",email: userEmail),
         ),
       );
     } else {
@@ -85,10 +100,17 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<String?> _onSignup(SignupData data) async {
     final result = await auth.signup(data.name!, data.password!);
     if (result != null) {
+    auth.getUserDetails().then((details) {
+      if (details != null) {
+        setState(() {
+          userEmail = details['email'];
+        });
+      }
+    });
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MyHomePage(title: "Daily Minder"),
+          builder: (context) => MyHomePage(title: "Daily Minder",email: userEmail),
         ),
       );
     } else {
