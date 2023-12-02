@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'Pages/Auth/Register.dart';
 import 'Pages/Auth/Login.dart';
+import 'Pages/Auth/Profile.dart';
 
 class MyDrawer extends StatelessWidget {
   final String? email;
@@ -24,11 +25,17 @@ class MyDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.today),
-            title: Text('Today'),
-            onTap: () {
-              // Handle "Today" feature
-            },
+            leading: Icon(Icons.person),
+            title: Text('Profile'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfilePage(),
+                  ),
+                );
+              },
           ),
           ListTile(
             leading: Icon(Icons.calendar_today),

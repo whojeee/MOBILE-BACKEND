@@ -46,6 +46,8 @@ dependencies:
   flutter_login:
   font_awesome_flutter:
   google_sign_in:
+  device_calendar:
+  cloud_firestore:
 
 dev_dependencies:
   flutter_test:
