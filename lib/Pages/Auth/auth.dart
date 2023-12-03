@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthFirebase {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -12,7 +13,7 @@ class AuthFirebase {
     if (user != null) {
       return {
         'email': user.email ?? '',
-        // 'uid': user.uid,
+        'uid': user.uid,
       };
     }
     return null;
@@ -42,6 +43,17 @@ class AuthFirebase {
         email: email,
         password: password,
       );
+
+    String userUid = userCredential.user!.uid;
+    final DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('profile').doc(userUid).get();
+
+    if (!userDoc.exists) {
+      await FirebaseFirestore.instance.collection('profile').doc(userUid).set({
+        'userId': userUid,
+      });
+    }
+
       return userCredential;
     } catch (e) {
       print("Signup error: $e");
