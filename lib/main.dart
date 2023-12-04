@@ -13,11 +13,21 @@ import 'package:tugaskelompok/Tools/Model/event_model.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'dart:async';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await requestPermission();
   runApp(MyApp());
+}
+
+Future<void> requestPermission() async {
+  var status = await Permission.storage.status;
+  if (!status.isGranted) {
+    // Jika izin belum diberikan, munculkan permintaan izin
+    await Permission.storage.request();
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -48,6 +48,8 @@ dependencies:
   google_sign_in:
   device_calendar:
   cloud_firestore:
+  permission_handler: ^11.0.1
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
