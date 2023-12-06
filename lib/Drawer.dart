@@ -19,20 +19,61 @@ class _MyDrawerState extends State<MyDrawer> {
   File? _image;
 
   Future getImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    // Check if permission is granted
+    var status = await Permission.photos.status;
+    if (status.isGranted) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
-    });
+      setState(() {
+        if (pickedFile != null) {
+          _image = File(pickedFile.path);
+        }
+      });
+    } else if (status.isPermanentlyDenied) {
+      // Handle case where permission is permanently denied
+      // You might want to open app settings for the user to enable the permission
+      openAppSettings();
+    } else {
+      // Permission is not granted, show a message or take appropriate action
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text("Permission Required"),
+          content: Text("To open the gallery, please grant permission."),
+          actions: <Widget>[
+            ElevatedButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    }
+    // Add more permissions if needed for other features
   }
 
   @override
   void initState() {
     super.initState();
-    // Memeriksa izin saat drawer diinisialisasi
+    // Check and request necessary permissions when the drawer is initialized
+    checkAndRequestPermissions();
+  }
+
+  Future<void> checkAndRequestPermissions() async {
+    // Check if permission is granted
+    var status = await Permission.photos.status;
+    if (status.isDenied) {
+      // Request permission if not granted
+      await Permission.photos.request();
+    } else if (status.isPermanentlyDenied) {
+      // Handle case where permission is permanently denied
+      // You might want to open app settings for the user to enable the permission
+      openAppSettings();
+    }
+    // Add more permissions if needed for other features
   }
 
   @override
@@ -46,7 +87,7 @@ class _MyDrawerState extends State<MyDrawer> {
             accountEmail: Text("${widget.email}"), // Replace with user's email
             currentAccountPicture: GestureDetector(
               onTap: () {
-                getImage(); // Panggil fungsi getImage() ketika gambar profil ditekan
+                getImage(); // Call getImage() function when the profile picture is tapped
               },
               child: CircleAvatar(
                 backgroundColor: Colors.white,
@@ -96,7 +137,7 @@ class _MyDrawerState extends State<MyDrawer> {
             title: Text('Logout'),
             onTap: () {
               widget
-                  ._logoutCallback(); // Panggil fungsi logout saat Logout diklik
+                  ._logoutCallback(); // Call the logout function when Logout is tapped
             },
           ),
         ],
