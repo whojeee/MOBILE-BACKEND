@@ -14,6 +14,8 @@ import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:localization/localization.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +35,23 @@ Future<void> requestPermission() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+  LocalJsonLocalization.delegate.directories=['lib/i18n'];
     return MaterialApp(
+      supportedLocales:const[
+        Locale('en','US'),
+        Locale('id','ID'),
+      ],
+      localizationsDelegates:[
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        LocalJsonLocalization.delegate,
+      ],
+      localeResolutionCallback:(locale,supportedLocales){
+        if(supportedLocales.contains(locale)){
+          return locale;
+        }
+        return const Locale('en','US');
+      },
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,

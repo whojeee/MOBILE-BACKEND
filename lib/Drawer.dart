@@ -3,6 +3,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'Pages/Auth/Profile.dart';
+import 'main.dart';
+import 'package:localization/localization.dart';
 
 class MyDrawer extends StatefulWidget {
   final String? email;
@@ -134,7 +136,7 @@ class _MyDrawerState extends State<MyDrawer> {
           Divider(),
           ListTile(
             leading: Icon(Icons.person),
-            title: Text('Logout'),
+            title: Text('Logout'.i18n()),
             onTap: () {
               widget
                   ._logoutCallback(); // Call the logout function when Logout is tapped

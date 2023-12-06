@@ -50,6 +50,10 @@ dependencies:
   cloud_firestore:
   permission_handler: ^11.0.1
   image_picker: ^1.0.4
+  flutter_localizations:
+    sdk: flutter
+    version: ^0.0.0
+  localization:
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +76,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - lib/i18n/
     - assets/images/bg.png
     - assets/images/BG1.png
     - assets/images/bg3.png
