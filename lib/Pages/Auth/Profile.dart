@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auth.dart';
+import 'package:localization/localization.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -85,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text('Profile'.i18n()),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -94,17 +95,17 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(labelText: 'Username'.i18n()),
             ),
             SizedBox(height: 16.0),
             TextField(
               controller: _profilePictureController,
-              decoration: InputDecoration(labelText: 'Profile Picture URL'),
+              decoration: InputDecoration(labelText: 'Profile-Picture-URL'.i18n()),
             ),
             SizedBox(height: 16.0),
             TextField(
               controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(labelText: 'Description'.i18n()),
               maxLines: 3,
             ),
             SizedBox(height: 16.0),
@@ -123,7 +124,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   )
                   .toList(),
-              hint: Text('Status'),
+              hint: Text('Status'.i18n()),
             ),
             // SizedBox(height: 16.0),
             // CheckboxListTile(
@@ -138,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _updateUserData,
-              child: Text('Update Profile'),
+              child: Text('Update-Profile'.i18n()),
             ),
           ],
         ),

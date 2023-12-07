@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localization/localization.dart';
 
 class BottomNavBar extends StatelessWidget {
   final Function(int) onTabTapped;
@@ -13,18 +14,18 @@ class BottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       onTap: onTabTapped,
       currentIndex: currentIndex,
-      items: const [
+      items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.list_alt),
-          label: 'Planner',
+          label: 'Planner'.i18n(),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.calendar_month),
-          label: 'Calendar',
+          label: 'Calendar'.i18n(),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.view_compact_rounded),
-          label: 'Features',
+          label: 'Features'.i18n(),
         ),
       ],
     );

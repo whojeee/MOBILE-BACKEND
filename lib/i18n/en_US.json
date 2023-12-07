@@ -1,3 +1,22 @@
 {
-    "Logout": "Keluar"
+    "Logout": "Logout",
+    "Events": "Events",
+    "Calendar": "Calendar",
+    "Profile": "Profile",
+    "Username": "Username",
+    "Welcome": "Welcome",
+    "Permission-Required": "Permission Required",
+    "Permission-Content": "To open the gallery, please grant permission.",
+    "No-events-available": "No events are available",
+    "Planner": "Planner",
+    "Features": "Features",
+    "Failed-Login": "Failed Login, please check your username and password",
+    "Sign-up-fail": "Signup Failed",
+    "Profile-Picture-URL": "Profile Picture URL",
+    "Description": "Description",
+    "Status": "Status",
+    "Update-Profile": "Update Profile",
+    "Daily-Minder": "Daily Minder",
+    "Feature":"Feature",
+    "Get-Started":"Get Started"
 }

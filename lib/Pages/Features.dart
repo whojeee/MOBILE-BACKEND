@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localization/localization.dart';
 
 class Features extends StatelessWidget {
   @override
@@ -8,7 +9,7 @@ class Features extends StatelessWidget {
         crossAxisCount: 2, // 2 cards per row
         children: [
           _FeatureCard(
-            title: 'Feature 1',
+            title: 'Feature'.i18n(),
             color: Colors.red,
             borderColor: Colors.orange,
             onTap: () {
@@ -17,7 +18,7 @@ class Features extends StatelessWidget {
             icon: Icons.star,
           ),
           _FeatureCard(
-            title: 'Feature 2',
+            title: 'Feature'.i18n(),
             color: Colors.red,
             borderColor: Colors.orange,
             onTap: () {
@@ -26,7 +27,7 @@ class Features extends StatelessWidget {
             icon: Icons.settings,
           ),
           _FeatureCard(
-            title: 'Feature 3',
+            title: 'Feature'.i18n(),
             color: Colors.yellow,
             borderColor: Colors.pink,
             onTap: () {
@@ -35,7 +36,7 @@ class Features extends StatelessWidget {
             icon: Icons.camera_alt,
           ),
           _FeatureCard(
-            title: 'Feature 4',
+            title: 'Feature'.i18n(),
             color: Colors.purple,
             borderColor: Colors.teal,
             onTap: () {

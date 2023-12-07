@@ -41,8 +41,8 @@ class _MyDrawerState extends State<MyDrawer> {
       showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-          title: Text("Permission Required"),
-          content: Text("To open the gallery, please grant permission."),
+          title: Text("Permission-Required".i18n()),
+          content: Text("Permission-Content".i18n()),
           actions: <Widget>[
             ElevatedButton(
               child: Text("OK"),
@@ -85,7 +85,7 @@ class _MyDrawerState extends State<MyDrawer> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text("Welcome"), // Replace with user's name
+            accountName: Text("Welcome".i18n()), // Replace with user's name
             accountEmail: Text("${widget.email}"), // Replace with user's email
             currentAccountPicture: GestureDetector(
               onTap: () {
@@ -108,7 +108,7 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
           ListTile(
             leading: Icon(Icons.person),
-            title: Text('Profile'),
+            title: Text('Profile'.i18n()),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -121,14 +121,14 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
           ListTile(
             leading: Icon(Icons.calendar_today),
-            title: Text('Calendar'),
+            title: Text('Calendar'.i18n()),
             onTap: () {
               // Handle "Calendar" feature
             },
           ),
           ListTile(
             leading: Icon(Icons.event_note),
-            title: Text('Events'),
+            title: Text('Events'.i18n()),
             onTap: () {
               // Handle "Events" feature
             },

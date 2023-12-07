@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tugaskelompok/Tools/Model/GetStart_FirstTime.dart';
 import 'package:tugaskelompok/main.dart';
 import 'package:tugaskelompok/Pages/Auth/Login.dart';
+import 'package:localization/localization.dart';
 
 class GetStart extends StatefulWidget {
   const GetStart({Key? key}) : super(key: key);
@@ -134,7 +135,7 @@ class _GetStartState extends State<GetStart> {
                 ),
               );
             },
-            'Get Started',
+            'Get-Started'.i18n(),
           ),
         ],
       ),

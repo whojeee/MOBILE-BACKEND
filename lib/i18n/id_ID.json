@@ -1,3 +1,22 @@
 {
-    "Logout": "Keluar"
+    "Logout": "Keluar",
+    "Events": "Acara",
+    "Calendar": "Kalender",
+    "Profile": "Profil",
+    "Username": "Nama Pengguna",
+    "Welcome": "Selamat Datang",
+    "Permission-Required": "Izin Diperlukan",
+    "Permission-Content": "Untuk membuka galeri, harap berikan izin.",
+    "No-events-available": "Tidak ada acara yang tersedia",
+    "Planner": "Perencana",
+    "Features": "Fitur",
+    "Failed-Login": "Login Gagal, Periksa kembali Nama dan Password",
+    "Sign-up-fail": "Pendaftaran Gagal",
+    "Profile-Picture-URL": "URL Gambar Profil",
+    "Description": "Deskripsi",
+    "Status": "Status",
+    "Update-Profile": "Perbarui Profil",
+    "Daily-Minder": "Pengingat Harian",
+    "Feature":"Fitur",
+    "Get-Started":"Memulai"
 }

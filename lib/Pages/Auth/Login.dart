@@ -3,6 +3,7 @@ import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tugaskelompok/Pages/Auth/auth.dart';
 import 'package:tugaskelompok/main.dart';
+import 'package:localization/localization.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MyHomePage(title: "Daily Minder", email: userEmail),
+            builder: (context) => MyHomePage(title: "Daily-Minder".i18n(), email: userEmail),
           ),
         );
       }
@@ -76,13 +77,13 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MyHomePage(title: "Daily Minder",email: userEmail),
+          builder: (context) => MyHomePage(title: "Daily-Minder".i18n(),email: userEmail),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Login Gagal. Periksa kembali username dan password."),
+          content: Text("Failed-Login".i18n()),
           action: SnackBarAction(
             label: "OK",
             onPressed: () {},
@@ -110,13 +111,13 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MyHomePage(title: "Daily Minder",email: userEmail),
+          builder: (context) => MyHomePage(title: "Daily-Minder".i18n(),email: userEmail),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Signup Gagal"),
+          content: Text("Sign-up-fail".i18n()),
           action: SnackBarAction(
             label: "ok",
             onPressed: () {},

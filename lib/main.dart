@@ -50,9 +50,9 @@ class MyApp extends StatelessWidget {
         if(supportedLocales.contains(locale)){
           return locale;
         }
-        return const Locale('en','US');
+        return const Locale('id','ID');
       },
-      title: 'Flutter Demo',
+      title: 'Planner App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -220,7 +220,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBody() {
     return events.isEmpty
-        ? Center(child: Text('No events available.'))
+        ? Center(child: Text('No-events-available'.i18n()))
         : ListView.builder(
             itemCount: events.length,
             itemBuilder: (context, index) {
@@ -305,7 +305,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleCheckboxChanged(int index, bool value) async {
-    print('Checkbos changed :$index,$value');
+    print('Checkbox changed :$index,$value');
     if (value && events[index].id != null) {
       print("Deleting event with ID: ${events[index].id}");
       // Hapus event dari database
