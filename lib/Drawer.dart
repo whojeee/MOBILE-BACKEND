@@ -3,7 +3,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'Pages/Auth/Profile.dart';
-import 'main.dart';
 import 'package:localization/localization.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -20,62 +19,27 @@ class MyDrawer extends StatefulWidget {
 class _MyDrawerState extends State<MyDrawer> {
   File? _image;
 
-  Future getImage() async {
-    // Check if permission is granted
-    var status = await Permission.photos.status;
+  // Function to request permission
+  Future<void> _requestGalleryPermission() async {
+    var status = await Permission.storage.request();
     if (status.isGranted) {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-      setState(() {
-        if (pickedFile != null) {
-          _image = File(pickedFile.path);
-        }
-      });
-    } else if (status.isPermanentlyDenied) {
-      // Handle case where permission is permanently denied
-      // You might want to open app settings for the user to enable the permission
-      openAppSettings();
+      // Do nothing here, permission is already granted
     } else {
-      // Permission is not granted, show a message or take appropriate action
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: Text("Permission-Required".i18n()),
-          content: Text("Permission-Content".i18n()),
-          actions: <Widget>[
-            ElevatedButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
+      // Handle the case where the user denies the permission
+      // You may want to show a dialog or message to inform the user
+      print('Permission denied');
     }
-    // Add more permissions if needed for other features
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Check and request necessary permissions when the drawer is initialized
-    checkAndRequestPermissions();
-  }
+  Future getImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-  Future<void> checkAndRequestPermissions() async {
-    // Check if permission is granted
-    var status = await Permission.photos.status;
-    if (status.isDenied) {
-      // Request permission if not granted
-      await Permission.photos.request();
-    } else if (status.isPermanentlyDenied) {
-      // Handle case where permission is permanently denied
-      // You might want to open app settings for the user to enable the permission
-      openAppSettings();
-    }
-    // Add more permissions if needed for other features
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
   }
 
   @override
@@ -89,6 +53,7 @@ class _MyDrawerState extends State<MyDrawer> {
             accountEmail: Text("${widget.email}"), // Replace with user's email
             currentAccountPicture: GestureDetector(
               onTap: () {
+                _requestGalleryPermission(); // Request permission when profile picture is tapped
                 getImage(); // Call getImage() function when the profile picture is tapped
               },
               child: CircleAvatar(
