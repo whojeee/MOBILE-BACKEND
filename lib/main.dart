@@ -17,6 +17,9 @@ import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:localization/localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -175,20 +178,50 @@ class _HomePageState extends State<HomePage> {
   StreamController<int> notificationStreamController = StreamController<int>();
   Stream<int> get notificationStream => notificationStreamController.stream;
   Sink<int> get notificationSink => notificationStreamController.sink;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   late BannerAd _bannerAd;
   bool _isAdLoaded = false;
+  bool isPremium = false;
 
   @override
   void initState() {
     super.initState();
+    _loadPremiumStatus();
     _loadEvents();
+    _initAdMob();
     DatabaseHelper.instance.eventCountStream.listen((count) {
       setState(() {
         eventCount = count;
       });
     });
-    _initAdMob();
+  }
+  
+  Future<void> _loadPremiumStatus() async {
+    try {
+    print("tes");
+      final User? user = await AuthFirebase().getUser();
+
+      if (user != null) {
+        final String userUid = user.uid;
+        final DocumentSnapshot userDoc = await _firestore
+            .collection('profile')
+            .doc(userUid)
+            .get();
+
+        if (userDoc.exists) {
+          final Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
+
+          setState(() {
+            isPremium = userData['premium'] ?? false;
+          });
+        }
+      }
+    } catch (error) {
+      print('Error loading premium status: $error');
+    }
   }
 
   void _initAdMob() {
@@ -217,7 +250,12 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Widget _buildAd() {
+Widget _buildAd() {
+  print(isPremium);
+  print(_isAdLoaded);
+  if (isPremium) {
+    return SizedBox.shrink(); // kalau premium user, maka akan tutup ad
+  } else {
     if (_isAdLoaded) {
       return Container(
         alignment: Alignment.bottomCenter,
@@ -229,6 +267,8 @@ class _HomePageState extends State<HomePage> {
       return SizedBox.shrink();
     }
   }
+}
+
 
   Future<void> _loadEventCount() async {
     DatabaseHelper.instance.eventCountStream.listen((count) {

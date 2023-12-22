@@ -60,6 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
             _profilePictureController.text = userData['profilePicture'];
             _descriptionController.text = userData['description'];
             _statusController.text = userData['status'];
+            _isPremium = userData['premium'] ?? false;
           });
         }
       }
@@ -171,6 +172,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   )
                   .toList(),
               hint: Text('Status'.i18n()),
+            ),
+            CheckboxListTile(
+              title: Text('Premium User'),
+              value: _isPremium,
+              onChanged: (bool? value) {
+                setState(() {
+                  _isPremium = value ?? false;
+                });
+              },
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
