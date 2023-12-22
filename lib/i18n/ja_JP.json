@@ -1,0 +1,22 @@
+{
+    "Logout": "ログアウト",
+    "Events": "イベント",
+    "Calendar": "カレンダー",
+    "Profile": "プロフィール",
+    "Username": "ユーザー名",
+    "Welcome": "ようこそ",
+    "Permission-Required": "必要な権限",
+    "Permission-Content": "ギャラリーを開くには、許可を与えてください。",
+    "No-events-available": "利用可能なイベントはありません",
+    "Planner": "プランナー",
+    "Features": "機能",
+    "Failed-Login": "ログインに失敗しました。ユーザー名とパスワードを再確認してください。",
+    "Sign-up-fail": "サインアップに失敗しました",
+    "Profile-Picture-URL": "プロフィール画像のURL",
+    "Description": "説明",
+    "Status": "ステータス",
+    "Update-Profile": "プロフィールを更新",
+    "Daily-Minder": "デイリーマインダー",
+    "Feature": "機能",
+    "Get-Started":"開始する"
+}

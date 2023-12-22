@@ -1,0 +1,22 @@
+{
+    "Logout": "Cerrar sesión",
+    "Events": "Eventos",
+    "Calendar": "Calendario",
+    "Profile": "Perfil",
+    "Username": "Nombre de usuario",
+    "Welcome": "Bienvenido",
+    "Permission-Required": "Permiso requerido",
+    "Permission-Content": "Para abrir la galería, por favor otorga el permiso.",
+    "No-events-available": "No hay eventos disponibles",
+    "Planner": "Planificador",
+    "Features": "Características",
+    "Failed-Login": "Inicio de sesión fallido, verifica nuevamente el nombre y la contraseña",
+    "Sign-up-fail": "Registro fallido",
+    "Profile-Picture-URL": "URL de la imagen de perfil",
+    "Description": "Descripción",
+    "Status": "Estado",
+    "Update-Profile": "Actualizar perfil",
+    "Daily-Minder": "Recordatorio diario",
+    "Feature": "Característica",
+    "Get-Started":"Empezar"
+}

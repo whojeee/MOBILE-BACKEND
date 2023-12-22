@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:localization/localization.dart';
@@ -21,6 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   String _selectedStatus = 'Active';
   bool _isPremium = false;
@@ -28,10 +30,12 @@ class _ProfilePageState extends State<ProfilePage> {
   late User _currentUser;
   File? _image;
   bool _isUpdating = false;
+  late String _profilePictureUrl;
 
   @override
   void initState() {
     super.initState();
+    _profilePictureUrl = '';
     _currentUser = _auth.currentUser!;
     _loadUserData();
   }
@@ -77,30 +81,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
         // Check if there is a new image to upload
         if (_image != null) {
-          // Convert the image to base64
-          List<int> imageBytes = await _image!.readAsBytes();
-          String base64Image = base64Encode(imageBytes);
+          // Upload the image to Firebase Storage
+          String imagePath = 'profilePictures/$userUid/${DateTime.now()}.png';
+          TaskSnapshot task = await _storage.ref(imagePath).putFile(_image!);
 
-          // Update user data with the base64-encoded image
-          await _firestore.collection('profile').doc(userUid).set({
-            'username': _usernameController.text,
-            'description': _descriptionController.text,
-            'status': _selectedStatus,
-            'premium': _isPremium,
-            'profilePicture':
-                base64Image, // Update with the base64-encoded image
-            'email': _currentUser.email,
-          });
-        } else {
-          // Update user data without image picking logic
-          await _firestore.collection('profile').doc(userUid).set({
-            'username': _usernameController.text,
-            'description': _descriptionController.text,
-            'status': _selectedStatus,
-            'premium': _isPremium,
-            'email': _currentUser.email,
-          });
+          // Get the download URL of the uploaded image
+          _profilePictureUrl = await task.ref.getDownloadURL();
         }
+
+        // Update user data in Firestore with the profile picture URL
+        await _firestore.collection('profile').doc(userUid).set({
+          'username': _usernameController.text,
+          'description': _descriptionController.text,
+          'status': _selectedStatus,
+          'premium': _isPremium,
+          'profilePicture': _profilePictureUrl, // Update with the image URL
+          'email': _currentUser.email,
+        });
 
         print('User data updated successfully!');
       }

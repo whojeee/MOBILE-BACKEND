@@ -55,6 +55,8 @@ dependencies:
     sdk: flutter
     version: ^0.0.0
   localization:
+  firebase_storage: ^11.5.5
+  google_mobile_ads: ^4.0.0
 
 dev_dependencies:
   flutter_test:

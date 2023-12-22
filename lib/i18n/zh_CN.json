@@ -1,0 +1,22 @@
+{
+    "Logout": "退出",
+    "Events": "事件",
+    "Calendar": "日历",
+    "Profile": "个人资料",
+    "Username": "用户名",
+    "Welcome": "欢迎",
+    "Permission-Required": "需要许可",
+    "Permission-Content": "要打开相册，请授予权限",
+    "No-events-available": "没有可用的事件",
+    "Planner": "计划者",
+    "Features": "特点",
+    "Failed-Login": "登录失败，请检查用户名和密码",
+    "Sign-up-fail": "注册失败",
+    "Profile-Picture-URL": "个人资料图片链接",
+    "Description": "描述",
+    "Status": "状态",
+    "Update-Profile": "更新个人资料",
+    "Daily-Minder": "每日提醒",
+    "Feature": "特征",
+    "Get-Started":"开始"
+}

@@ -1,0 +1,22 @@
+{
+    "Logout": "로그아웃",
+    "Events": "이벤트",
+    "Calendar": "캘린더",
+    "Profile": "프로필",
+    "Username": "사용자 이름",
+    "Welcome": "환영합니다",
+    "Permission-Required": "권한이 필요함",
+    "Permission-Content": "갤러리를 열려면 권한을 부여하세요.",
+    "No-events-available": "사용 가능한 이벤트가 없습니다",
+    "Planner": "플래너",
+    "Features": "기능",
+    "Failed-Login": "로그인 실패, 이름과 비밀번호를 다시 확인하세요",
+    "Sign-up-fail": "가입 실패",
+    "Profile-Picture-URL": "프로필 사진 URL",
+    "Description": "설명",
+    "Status": "상태",
+    "Update-Profile": "프로필 업데이트",
+    "Daily-Minder": "일일 알림",
+    "Feature": "기능",
+    "Get-Started":"시작하기"
+}

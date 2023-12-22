@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:tugaskelompok/Pages/Auth/Login.dart';
-import 'package:tugaskelompok/Pages/Loading.dart';
-import 'Pages/Auth/auth.dart';
-import 'botnav.dart';
-import 'Pages/Calendar.dart';
+import 'package:tugaskelompok/Pages/Auth/auth.dart';
+import 'package:tugaskelompok/Pages/Features.dart';
 import 'package:tugaskelompok/Pages/NewEvent.dart';
+import 'package:tugaskelompok/Pages/Loading.dart';
+import 'package:tugaskelompok/botnav.dart';
+import 'Pages/Calendar.dart';
 import 'Drawer.dart';
-import 'Pages/Features.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
@@ -27,7 +28,7 @@ void main() async {
 Future<void> requestPermission() async {
   var status = await Permission.storage.status;
   if (!status.isGranted) {
-    // Jika izin belum diberikan, munculkan permintaan izin
+    // If permission is not granted, request it
     await Permission.storage.request();
   }
 }
@@ -35,22 +36,27 @@ Future<void> requestPermission() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  LocalJsonLocalization.delegate.directories=['lib/i18n'];
+    LocalJsonLocalization.delegate.directories = ['lib/i18n'];
     return MaterialApp(
-      supportedLocales:const[
-        Locale('en','US'),
-        Locale('id','ID'),
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('id', 'ID'),
+        Locale('ja', 'JP'),
+        Locale('it', 'IT'),
+        Locale('ko', 'KR'),
+        Locale('zh', 'CN'),
+        Locale('es', 'ES'),
       ],
-      localizationsDelegates:[
+      localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         LocalJsonLocalization.delegate,
       ],
-      localeResolutionCallback:(locale,supportedLocales){
-        if(supportedLocales.contains(locale)){
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (supportedLocales.contains(locale)) {
           return locale;
         }
-        return const Locale('id','ID');
+        return const Locale('id', 'ID');
       },
       title: 'Planner App',
       theme: ThemeData(
@@ -67,8 +73,6 @@ class MyHomePage extends StatefulWidget {
   final String? email;
 
   const MyHomePage({Key? key, required this.title, this.email});
-
-  // const MyHomePage({required this.title});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -172,6 +176,9 @@ class _HomePageState extends State<HomePage> {
   Stream<int> get notificationStream => notificationStreamController.stream;
   Sink<int> get notificationSink => notificationStreamController.sink;
 
+  late BannerAd _bannerAd;
+  bool _isAdLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -181,6 +188,46 @@ class _HomePageState extends State<HomePage> {
         eventCount = count;
       });
     });
+    _initAdMob();
+  }
+
+  void _initAdMob() {
+    _bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      size: AdSize.banner,
+      request: AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
+  }
+
+  Widget _buildAd() {
+    if (_isAdLoaded) {
+      return Container(
+        alignment: Alignment.bottomCenter,
+        child: AdWidget(ad: _bannerAd),
+        width: _bannerAd.size.width.toDouble(),
+        height: _bannerAd.size.height.toDouble(),
+      );
+    } else {
+      return SizedBox.shrink();
+    }
   }
 
   Future<void> _loadEventCount() async {
@@ -190,21 +237,6 @@ class _HomePageState extends State<HomePage> {
         notificationSink.add(count); // Mengirim jumlah notifikasi ke stream
       });
     });
-  }
-
-  String getTitle(int index) {
-    switch (index) {
-      case 0:
-        return 'Today';
-      case 1:
-        return 'Week';
-      case 2:
-        return 'Month';
-      case 3:
-        return 'Year';
-      default:
-        return '';
-    }
   }
 
   Future<void> _loadEvents() async {
@@ -337,16 +369,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void dispose() {
-    pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     return Scaffold(
-      body: _buildBody(),
+      body: Column(
+        children: [Expanded(child: _buildBody()), _buildAd()],
+      ),
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: FloatingActionButton(
