@@ -73,51 +73,59 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void fetchData() async {
-    final apiUrl = 'https://kasekiru.com/api/liburan/oG37i2GyVq64zRGI';
-    final response = await http.get(Uri.parse(apiUrl));
+    try {
+      final apiUrl = 'https://kasekiru.com/api/liburan/oG37i2GyVq64zRGI';
+      final response = await http.get(Uri.parse(apiUrl));
 
-    if (response.statusCode == 200) {
-      final dynamic jsonResponse = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final dynamic jsonResponse = json.decode(response.body);
 
-      if (jsonResponse is Map && jsonResponse.containsKey("data")) {
-        final data = jsonResponse["data"];
-        if (data is List) {
-          setState(() {
-            holidayData = data.map((item) => MyData.fromJson(item)).toList();
-          });
+        if (jsonResponse is Map && jsonResponse.containsKey("data")) {
+          final data = jsonResponse["data"];
+          if (data is List && mounted) {
+            setState(() {
+              holidayData = data.map((item) => MyData.fromJson(item)).toList();
+            });
+          } else {
+            throw Exception('API response data is not a JSON array.');
+          }
         } else {
-          throw Exception('API response data is not a JSON array.');
+          throw Exception('API response is missing the "data" key.');
         }
       } else {
-        throw Exception('API response is missing the "data" key.');
+        throw Exception('Failed to load data');
       }
-    } else {
-      throw Exception('Failed to load data');
+    } catch (error) {
+      print('Error fetching data: $error');
     }
   }
 
   void fetchData2() async {
-    final apiUrl = "https://kasekiru.com/api/liburan/JeiaFN39De20Snra";
-    final response = await http.get(Uri.parse(apiUrl));
+    try {
+      final apiUrl = "https://kasekiru.com/api/liburan/JeiaFN39De20Snra";
+      final response = await http.get(Uri.parse(apiUrl));
 
-    if (response.statusCode == 200) {
-      final dynamic jsonResponse = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final dynamic jsonResponse = json.decode(response.body);
 
-      if (jsonResponse is Map && jsonResponse.containsKey("data")) {
-        final data = jsonResponse["data"];
-        if (data is List) {
-          setState(() {
-            holidayData
-                .addAll(data.map((item) => MyData.fromJson(item)).toList());
-          });
+        if (jsonResponse is Map && jsonResponse.containsKey("data")) {
+          final data = jsonResponse["data"];
+          if (data is List && mounted) {
+            setState(() {
+              holidayData
+                  .addAll(data.map((item) => MyData.fromJson(item)).toList());
+            });
+          } else {
+            throw Exception('API response data is not a JSON array.');
+          }
         } else {
-          throw Exception('API response data is not a JSON array.');
+          throw Exception('API response is missing the "data" key.');
         }
       } else {
-        throw Exception('API response is missing the "data" key.');
+        throw Exception('Failed to load data');
       }
-    } else {
-      throw Exception('Failed to load data');
+    } catch (error) {
+      print('Error fetching data: $error');
     }
   }
 
@@ -146,7 +154,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           SizedBox(height: 20),
           Container(
-              height: 200,
+              height: 170,
               child: ListTile(
                 leading: Icon(Icons.calendar_today),
                 title: Text(getEventText()),

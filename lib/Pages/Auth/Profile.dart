@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:localization/localization.dart';
 
 class ProfilePage extends StatefulWidget {
+  static bool isPremium=false;
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -72,8 +73,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _updateUserData() async {
     try {
       setState(() {
-        _isUpdating = true;
-      });
+      _isUpdating = false;
+      // Update the static variable when premium status changes
+      ProfilePage.isPremium = _isPremium;
+    });
 
       final User? user = await AuthFirebase().getUser();
 

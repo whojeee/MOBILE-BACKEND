@@ -15,11 +15,10 @@ import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:localization/localization.dart';
+import 'package:localization/localization.dart  ';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -197,18 +196,16 @@ class _HomePageState extends State<HomePage> {
       });
     });
   }
-  
+
   Future<void> _loadPremiumStatus() async {
     try {
-    print("tes");
+      print("tes");
       final User? user = await AuthFirebase().getUser();
 
       if (user != null) {
         final String userUid = user.uid;
-        final DocumentSnapshot userDoc = await _firestore
-            .collection('profile')
-            .doc(userUid)
-            .get();
+        final DocumentSnapshot userDoc =
+            await _firestore.collection('profile').doc(userUid).get();
 
         if (userDoc.exists) {
           final Map<String, dynamic> userData =
@@ -250,25 +247,24 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-Widget _buildAd() {
-  print(isPremium);
-  print(_isAdLoaded);
-  if (isPremium) {
-    return SizedBox.shrink(); // kalau premium user, maka akan tutup ad
-  } else {
-    if (_isAdLoaded) {
-      return Container(
-        alignment: Alignment.bottomCenter,
-        child: AdWidget(ad: _bannerAd),
-        width: _bannerAd.size.width.toDouble(),
-        height: _bannerAd.size.height.toDouble(),
-      );
+  Widget _buildAd() {
+    print(isPremium);
+    print(_isAdLoaded);
+    if (isPremium) {
+      return SizedBox.shrink(); // kalau premium user, maka akan tutup ad
     } else {
-      return SizedBox.shrink();
+      if (_isAdLoaded) {
+        return Container(
+          alignment: Alignment.bottomCenter,
+          child: AdWidget(ad: _bannerAd),
+          width: _bannerAd.size.width.toDouble(),
+          height: _bannerAd.size.height.toDouble(),
+        );
+      } else {
+        return SizedBox.shrink();
+      }
     }
   }
-}
-
 
   Future<void> _loadEventCount() async {
     DatabaseHelper.instance.eventCountStream.listen((count) {

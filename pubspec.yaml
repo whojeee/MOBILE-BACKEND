@@ -42,7 +42,7 @@ dependencies:
   intl:
   http:
   sqflite:
-  firebase_core:
+  firebase_core: ^2.24.2
   firebase_auth:
   flutter_login:
   font_awesome_flutter:
