@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "12401720109",
-    "project_id": "apa-group-f2795",
-    "storage_bucket": "apa-group-f2795.appspot.com"
+    "project_number": "84210679060",
+    "project_id": "apa-group-f6719",
+    "storage_bucket": "apa-group-f6719.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:12401720109:android:e2c150ddcda12e2cd0f1a4",
+        "mobilesdk_app_id": "1:84210679060:android:a03551b77ad94cdf4e1601",
         "android_client_info": {
           "package_name": "com.example.tugaskelompok"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCcDYi5FOVuB4Lmm-ldOxEPEJxwJTYP5W4"
+          "current_key": "AIzaSyCDcVG4Go9DOjzLkwa2v0Tjg8Il08pDb2s"
         }
       ],
       "services": {
