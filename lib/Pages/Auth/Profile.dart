@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:localization/localization.dart';
 
 class ProfilePage extends StatefulWidget {
-  static bool isPremium=false;
+  static bool isPremium = false;
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -47,10 +48,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (user != null) {
         final String userUid = user.uid;
-        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('profile')
-            .doc(userUid)
-            .get();
+        final DocumentSnapshot userDoc =
+            await _firestore.collection('profile').doc(userUid).get();
 
         if (userDoc.exists) {
           final Map<String, dynamic> userData =
@@ -62,7 +61,9 @@ class _ProfilePageState extends State<ProfilePage> {
             _descriptionController.text = userData['description'];
             _statusController.text = userData['status'];
             _isPremium = userData['premium'] ?? false;
+            ProfilePage.isPremium = _isPremium;
           });
+          _showInterstitialAd();
         }
       }
     } catch (error) {
@@ -70,13 +71,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _updateUserData() async {
+  void _updateUserData() async {
     try {
       setState(() {
-      _isUpdating = false;
-      // Update the static variable when premium status changes
-      ProfilePage.isPremium = _isPremium;
-    });
+        _isUpdating = true;
+        // Update the static variable when premium status changes
+        ProfilePage.isPremium = _isPremium;
+      });
 
       final User? user = await AuthFirebase().getUser();
 
@@ -102,7 +103,6 @@ class _ProfilePageState extends State<ProfilePage> {
           'profilePicture': _profilePictureUrl, // Update with the image URL
           'email': _currentUser.email,
         });
-
         print('User data updated successfully!');
       }
     } catch (error) {
@@ -195,4 +195,11 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+}
+
+void _showInterstitialAd() {
+  print('Status Premium: ${ProfilePage.isPremium}');
+
+  bool IsPremiumUser = ProfilePage.isPremium;
+  print('Pengguna Premium: $IsPremiumUser');
 }

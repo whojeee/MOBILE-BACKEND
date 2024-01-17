@@ -23,10 +23,6 @@ class BottomNavBar extends StatelessWidget {
           icon: Icon(Icons.calendar_month),
           label: 'Calendar'.i18n(),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.view_compact_rounded),
-          label: 'Features'.i18n(),
-        ),
       ],
     );
   }

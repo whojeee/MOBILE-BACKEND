@@ -19,16 +19,21 @@ class DatabaseHelper {
 
   void initEventCountStream() async {
     try {
-      // Di sini Anda dapat menghubungkannya ke database dan mengambil jumlah acara
-      int eventCount =
-          await fetchEventCountFromDatabase(); // Contoh fungsi pengambilan jumlah acara dari database
-
-      // Kemudian mengirimkannya ke stream
+      int eventCount = await fetchEventCountFromDatabase();
       _eventCountStreamController.sink.add(eventCount);
+
+      // Listen for changes and update the main controller
+      _eventCountStreamController.stream.listen((count) {
+        _eventCountController.sink.add(count);
+      });
     } catch (e) {
-      // Tangani jika terjadi kesalahan saat mengambil jumlah acara dari database
       print("Error initializing event count stream: $e");
     }
+  }
+
+  void dispose() {
+    _eventCountController.close();
+    _eventCountStreamController.close();
   }
 
   Future<int> fetchEventCountFromDatabase() async {
@@ -104,4 +109,6 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete('events', where: 'id = ?', whereArgs: [id]);
   }
+
+  getEvents() {}
 }

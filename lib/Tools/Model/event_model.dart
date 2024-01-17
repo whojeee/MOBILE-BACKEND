@@ -3,7 +3,6 @@ class EventModel {
   final String eventName;
   final String eventDescription;
   final String eventDate;
-  final String createdBy;
   bool isChecked;
 
   EventModel({
@@ -11,7 +10,6 @@ class EventModel {
     required this.eventName,
     required this.eventDescription,
     required this.eventDate,
-    required this.createdBy,
     this.isChecked = false,
   });
 
@@ -21,7 +19,6 @@ class EventModel {
       eventName: map['eventName'],
       eventDescription: map['eventDescription'],
       eventDate: map['eventDate'],
-      createdBy: map['createdBy'],
       isChecked: map['isChecked'] == 1,
     );
   }
@@ -31,7 +28,6 @@ class EventModel {
       'eventName': eventName,
       'eventDescription': eventDescription,
       'eventDate': eventDate,
-      'createdBy': createdBy,
       'isChecked': isChecked ? 1 : 0,
     };
   }

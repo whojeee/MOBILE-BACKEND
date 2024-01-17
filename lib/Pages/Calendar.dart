@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:http/http.dart' as http;
+import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
+import 'package:tugaskelompok/Tools/Model/event_model.dart';
 import 'dart:convert';
-// import 'package:device_calendar/device_calendar.dart'; blom terpakai
 
 class MyData {
   final int id;
@@ -37,11 +38,19 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<MyData> holidayData = [];
+  List<EventModel> events = [];
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
       _selectedDay = selectedDay;
     });
+
+    try {
+      _getEventsForSelectedDay(selectedDay);
+      _loadEvents();
+    } catch (error) {
+      print('Error updating events for selected day: $error');
+    }
   }
 
   String getEventText() {
@@ -49,17 +58,17 @@ class _CalendarPageState extends State<CalendarPage> {
       final selectedDate =
           "${_selectedDay!.year}-${_selectedDay!.month.toString().padLeft(2, '0')}-${_selectedDay!.day.toString().padLeft(2, '0')}";
 
-      final eventData = holidayData.firstWhere(
-        (data) => data.holidayDate == selectedDate,
-        orElse: () => MyData(
-          id: -1,
-          information: "Tidak Ada Kegiatan",
-          day: "",
-          holidayDate: selectedDate,
+      final eventData = events.firstWhere(
+        (data) => data.eventDate == selectedDate,
+        orElse: () => EventModel(
+          eventName: "Tidak Ada Kegiatan",
+          eventDescription: "",
+          eventDate: selectedDate,
+          isChecked: false,
         ),
       );
 
-      return eventData.information;
+      return eventData.eventName;
     } else {
       return "";
     }
@@ -69,7 +78,8 @@ class _CalendarPageState extends State<CalendarPage> {
   void initState() {
     super.initState();
     fetchData();
-    fetchData2(); // Panggil fungsi fetchData2024
+    fetchData2();
+    _loadEvents();
   }
 
   void fetchData() async {
@@ -132,35 +142,68 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          TableCalendar(
-            firstDay: DateTime.utc(2023, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            calendarFormat: _calendarFormat,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: _onDaySelected,
-            onFormatChanged: (format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-            },
-          ),
-          SizedBox(height: 20),
-          Container(
-              height: 170,
-              child: ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text(getEventText()),
-              )),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            TableCalendar(
+              firstDay: DateTime.utc(2023, 1, 1),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              calendarFormat: _calendarFormat,
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
+              onDaySelected: _onDaySelected,
+              onFormatChanged: (format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              },
+              onPageChanged: (focusedDay) {
+                _focusedDay = focusedDay;
+              },
+            ),
+            SizedBox(height: 20),
+            _buildEventText(),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildEventText() {
+    return Container(
+      height: 170,
+      child: ListTile(
+        leading: Icon(Icons.calendar_today),
+        title: Text(getEventText()),
+      ),
+    );
+  }
+
+  Future<void> _getEventsForSelectedDay(DateTime selectedDay) async {
+    final selectedDate =
+        "${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}";
+
+    final eventData = events.firstWhere(
+      (data) => data.eventDate == selectedDate,
+      orElse: () => EventModel(
+        eventName: "Tidak Ada Kegiatan",
+        eventDescription: "",
+        eventDate: selectedDate,
+        isChecked: false,
+      ),
+    );
+
+    setState(() {
+      events = [eventData];
+    });
+  }
+
+  void _loadEvents() async {
+    final eventsData = await DatabaseHelper.instance.queryAllEvents();
+    setState(() {
+      events = eventsData;
+    });
   }
 }

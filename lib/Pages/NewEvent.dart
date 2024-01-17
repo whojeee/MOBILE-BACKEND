@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
+import 'package:tugaskelompok/main.dart';
+import 'globals.dart' as globals;
 
 class NewEventPage extends StatefulWidget {
   final Function(EventModel) onNewEventAdded; // Tambahkan ini
@@ -21,33 +23,49 @@ class _NewEventPageState extends State<NewEventPage> {
 
   late DateTime selectedDate = DateTime.now();
 
+  List<EventModel> globalEvents = [];
+
   @override
   void initState() {
     super.initState();
   }
 
-  void _addEvent(BuildContext context) async {
-    final eventName = eventNameController.text;
-    final eventDescription = eventDescriptionController.text;
-    final createdBy = eventCreatedByController.text;
-    final eventDate = selectedDate.toIso8601String();
-
-    final event = EventModel(
-      eventName: eventName,
-      eventDescription: eventDescription,
-      eventDate: eventDate,
-      createdBy: createdBy,
-      isChecked: false,
-    );
-
+  void _addEvent(BuildContext context) {
     try {
-      await DatabaseHelper.instance.insertEvent(event.toMap());
+      final eventName = eventNameController.text;
+      final eventDescription = eventDescriptionController.text;
+      final eventDate = selectedDate.toIso8601String();
+
+      print('Event Name: $eventName');
+      print('Event Description: $eventDescription');
+      print('Event Date: $eventDate');
+
+      if (eventName.isEmpty) {
+        throw 'Please fill in the event name';
+      }
+
+      final event = EventModel(
+        eventName: eventName,
+        eventDescription: eventDescription,
+        eventDate: eventDate,
+        isChecked: false,
+      );
+
+      // Debug print for checking event details
+      print('Event Details: $event');
+
+      DatabaseHelper.instance.insertEvent(event.toMap());
       widget.onNewEventAdded(event);
+
+      print('Event added successfully');
+
+      // Gunakan Navigator.pop untuk kembali ke halaman sebelumnya
       Navigator.pop(context);
+      print('Navigating back to the previous page');
     } catch (error) {
-      print('Database insertion error: $error');
+      print('Error creating event: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create the event')),
+        SnackBar(content: Text('Failed to create the event: $error')),
       );
     }
   }
@@ -87,10 +105,6 @@ class _NewEventPageState extends State<NewEventPage> {
               controller: eventDescriptionController,
               decoration: InputDecoration(labelText: 'Event Description'),
             ),
-            TextField(
-              controller: eventCreatedByController,
-              decoration: InputDecoration(labelText: 'Created By'),
-            ),
             SizedBox(height: 10),
             TextField(
               controller: selectedDayController,
@@ -108,6 +122,7 @@ class _NewEventPageState extends State<NewEventPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
+                print('Create Event button pressed');
                 _addEvent(context);
               },
               child: Text('Create Event'),

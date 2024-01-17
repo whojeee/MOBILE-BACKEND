@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:tugaskelompok/Pages/Auth/Login.dart';
+import 'package:tugaskelompok/Pages/Auth/Profile.dart';
 import 'package:tugaskelompok/Pages/Auth/auth.dart';
-import 'package:tugaskelompok/Pages/Features.dart';
+import 'package:tugaskelompok/Pages/GetStart.dart';
 import 'package:tugaskelompok/Pages/NewEvent.dart';
 import 'package:tugaskelompok/Pages/Loading.dart';
 import 'package:tugaskelompok/botnav.dart';
@@ -13,7 +14,6 @@ import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:localization/localization.dart  ';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -23,8 +23,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await MobileAds.instance.initialize();
   await requestPermission();
-  runApp(MyApp());
+
+  bool isPremiumUser = false;
+
+  runApp(MyApp(
+    isPremiumUser: isPremiumUser,
+  ));
 }
 
 Future<void> requestPermission() async {
@@ -36,6 +42,10 @@ Future<void> requestPermission() async {
 }
 
 class MyApp extends StatelessWidget {
+  final bool isPremiumUser;
+
+  const MyApp({Key? key, required this.isPremiumUser}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     LocalJsonLocalization.delegate.directories = ['lib/i18n'];
@@ -65,7 +75,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: const LoadingPage(),
+      home: LoadingPage(
+        isPremiumUser: isPremiumUser,
+      ),
     );
   }
 }
@@ -74,18 +86,29 @@ class MyHomePage extends StatefulWidget {
   final String title;
   final String? email;
 
-  const MyHomePage({Key? key, required this.title, this.email});
+  const MyHomePage(
+      {Key? key, required this.title, this.email, required bool isPremiumUser});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState(isPremiumUser: null);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
+  List<EventModel> events = [];
   int eventCount = 0;
   late AuthFirebase auth;
 
-  final List<Widget> _children = [HomePage(), CalendarPage(), Features()];
+  var isPremiumUser;
+
+  _MyHomePageState({required this.isPremiumUser});
+
+  final List<Widget> _children = [
+    HomePage(
+      onPremiumStatusReceived: (p0) {},
+    ),
+    CalendarPage(),
+  ];
   StreamController<int> myNotificationStreamController =
       StreamController<int>.broadcast();
   @override
@@ -164,6 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class HomePage extends StatefulWidget {
+  final Function(bool) onPremiumStatusReceived; // Tambahkan properti ini
+
+  HomePage({Key? key, required this.onPremiumStatusReceived}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -177,19 +204,29 @@ class _HomePageState extends State<HomePage> {
   StreamController<int> notificationStreamController = StreamController<int>();
   Stream<int> get notificationStream => notificationStreamController.stream;
   Sink<int> get notificationSink => notificationStreamController.sink;
+  StreamSubscription<bool>? _premiumStatusSubscription;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  late BannerAd _bannerAd;
+  BannerAd? _bannerAd;
   bool _isAdLoaded = false;
   bool isPremium = false;
+
+  bool isUserPremium = false;
+
+  StreamController<bool> _premiumStatusStreamController =
+      StreamController<bool>.broadcast();
+  Stream<bool> get premiumStatusStream => _premiumStatusStreamController.stream;
+
+  late InterstitialAd _interstitialAd;
+  bool _isInterstitialAdLoaded = false;
 
   @override
   void initState() {
     super.initState();
+
     _loadPremiumStatus();
     _loadEvents();
-    _initAdMob();
     DatabaseHelper.instance.eventCountStream.listen((count) {
       setState(() {
         eventCount = count;
@@ -199,7 +236,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadPremiumStatus() async {
     try {
-      print("tes");
       final User? user = await AuthFirebase().getUser();
 
       if (user != null) {
@@ -212,8 +248,17 @@ class _HomePageState extends State<HomePage> {
               userDoc.data() as Map<String, dynamic>;
 
           setState(() {
-            isPremium = userData['premium'] ?? false;
+            isUserPremium = userData['premium'] ?? false;
+            _premiumStatusStreamController.add(isUserPremium);
           });
+
+          // Hanya inisialisasi iklan jika pengguna bukan premium
+          if (!isUserPremium) {
+            _initAdMob();
+          }
+
+          // Kirim status premium ke LoadingPage
+          widget.onPremiumStatusReceived(isUserPremium);
         }
       }
     } catch (error) {
@@ -222,47 +267,84 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _initAdMob() {
-    _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-3940256099942544/6300978111',
-      size: AdSize.banner,
-      request: AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          setState(() {
-            _isAdLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-        },
-      ),
-    );
-
-    _bannerAd.load();
+    if (!isUserPremium) {
+      _bannerAd = BannerAd(
+        adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+        size: AdSize.banner,
+        request: AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (_) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+          },
+        ),
+      );
+      _bannerAd!.load();
+      _initInterstitialAd(isUserPremium);
+    }
   }
 
-  @override
-  void dispose() {
-    _bannerAd.dispose();
-    super.dispose();
+  void _initInterstitialAd(bool isUserPremium) {
+    if (!isUserPremium) {
+      InterstitialAd.load(
+        adUnitId: 'ca-app-pub-3940256099942544/1033173712',
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+            setState(() {
+              _interstitialAd = ad;
+              _isInterstitialAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            print('InterstitialAd failed to load: $error');
+          },
+        ),
+      );
+    }
+  }
+
+  void _showInterstitialAd(bool isPremium) {
+    // Tampilkan interstitial ad hanya jika pengguna bukan premium
+    if (!isPremium) {
+      if (_isAdLoaded && _interstitialAd != null) {
+        _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
+          onAdDismissedFullScreenContent: (InterstitialAd ad) {
+            // Navigasi ke GetStart setelah menutup iklan
+            _navigateToGetStart();
+          },
+          onAdFailedToShowFullScreenContent:
+              (InterstitialAd ad, AdError error) {
+            // Navigasi ke GetStart jika gagal menampilkan iklan
+            _navigateToGetStart();
+          },
+          onAdShowedFullScreenContent: (InterstitialAd ad) {
+            // Iklan ditampilkan, Anda dapat melakukan tindakan apa pun di sini
+          },
+        );
+        _interstitialAd.show();
+      } else {
+        // Jika iklan gagal dimuat atau tidak diinisialisasi, navigasi ke GetStart segera
+        _navigateToGetStart();
+      }
+    }
   }
 
   Widget _buildAd() {
-    print(isPremium);
-    print(_isAdLoaded);
-    if (isPremium) {
-      return SizedBox.shrink(); // kalau premium user, maka akan tutup ad
+    if (isUserPremium || !_isAdLoaded) {
+      return SizedBox
+          .shrink(); // Sembunyikan iklan untuk pengguna premium atau jika belum dimuat
     } else {
-      if (_isAdLoaded) {
-        return Container(
-          alignment: Alignment.bottomCenter,
-          child: AdWidget(ad: _bannerAd),
-          width: _bannerAd.size.width.toDouble(),
-          height: _bannerAd.size.height.toDouble(),
-        );
-      } else {
-        return SizedBox.shrink();
-      }
+      return Container(
+        alignment: Alignment.bottomCenter,
+        child: AdWidget(ad: _bannerAd!),
+        width: _bannerAd!.size.width.toDouble(),
+        height: _bannerAd!.size.height.toDouble(),
+      );
     }
   }
 
@@ -276,20 +358,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadEvents() async {
-    final eventsData = await DatabaseHelper.instance.queryAllEvents();
-    print('loaded events : $eventsData');
-    if (eventsData != null) {
-      eventsData.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-      setState(() {
-        this.events = eventsData;
-      });
+    if (mounted) {
+      final eventsData = await DatabaseHelper.instance.queryAllEvents();
+      print('loaded events : $eventsData');
+      if (eventsData != null && mounted) {
+        eventsData.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+        setState(() {
+          this.events = eventsData;
+        });
+      }
     }
   }
 
   Widget _buildBody() {
-    return events.isEmpty
+    return events == null || events.isEmpty
         ? Center(child: Text('No-events-available'.i18n()))
         : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             itemCount: events.length,
             itemBuilder: (context, index) {
               String formattedDate = DateFormat('EEEE, d - MM - y')
@@ -374,15 +460,41 @@ class _HomePageState extends State<HomePage> {
 
   void _handleCheckboxChanged(int index, bool value) async {
     print('Checkbox changed :$index,$value');
+
     if (value && events[index].id != null) {
       print("Deleting event with ID: ${events[index].id}");
+
       // Hapus event dari database
       await DatabaseHelper.instance.deleteEvent(events[index].id!);
 
       // Update jumlah notifikasi
       DatabaseHelper.instance.updateEventCount();
+
+      // Jika checkbox status premium dicentang
+      if (index == 0) {
+        // Update status premium di Firestore
+        final User? user = await AuthFirebase().getUser();
+        if (user != null) {
+          final String userUid = user.uid;
+          await FirebaseFirestore.instance
+              .collection('profile')
+              .doc(userUid)
+              .update({
+            'premium': true,
+          });
+
+          // Nonaktifkan iklan karena pengguna sekarang menjadi premium
+          setState(() {
+            isPremium = true;
+          });
+
+          // Mengirim status premium ke ProfilePage
+          ProfilePage.isPremium = true;
+        }
+      }
     }
 
+    // Lakukan pembaruan state di dalam blok setState
     setState(() {
       events[index].isChecked = value;
 
@@ -395,21 +507,17 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _handleNewEventAdded(EventModel addedEvent) {
-    setState(() {
-      events.add(addedEvent);
-      events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-    });
-
-    DatabaseHelper.instance.updateEventCount();
-  }
-
   @override
   Widget build(BuildContext context) {
     events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     return Scaffold(
-      body: Column(
-        children: [Expanded(child: _buildBody()), _buildAd()],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildBody(),
+            _buildAd(),
+          ],
+        ),
       ),
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
@@ -419,6 +527,27 @@ class _HomePageState extends State<HomePage> {
           },
           child: Icon(Icons.create),
         ),
+      ),
+    );
+  }
+
+  void _handleNewEventAdded(EventModel addedEvent) async {
+    setState(() {
+      events.add(addedEvent);
+      events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+    });
+
+    // Update jumlah notifikasi
+    DatabaseHelper.instance.updateEventCount();
+
+    // Panggil _loadEvents() untuk memastikan daftar event diperbarui
+    await _loadEvents();
+  }
+
+  void _navigateToGetStart() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => GetStart(),
       ),
     );
   }
