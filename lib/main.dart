@@ -90,7 +90,7 @@ class MyHomePage extends StatefulWidget {
       {Key? key, required this.title, this.email, required bool isPremiumUser});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState(isPremiumUser: null);
+  State<MyHomePage> createState() => _MyHomePageState(isPremiumUser: false);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -311,7 +311,7 @@ class _HomePageState extends State<HomePage> {
   void _showInterstitialAd(bool isPremium) {
     // Tampilkan interstitial ad hanya jika pengguna bukan premium
     if (!isPremium) {
-      if (_isAdLoaded && _interstitialAd != null) {
+      if (_isAdLoaded && _interstitialAd != true) {
         _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
           onAdDismissedFullScreenContent: (InterstitialAd ad) {
             // Navigasi ke GetStart setelah menutup iklan

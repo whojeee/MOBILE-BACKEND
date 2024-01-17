@@ -109,7 +109,7 @@ class _LoadingPageState extends State<LoadingPage> {
   void _showInterstitialAd(bool isPremium) {
     // Tampilkan interstitial ad hanya jika pengguna bukan premium
     if (!isPremium) {
-      if (_isAdLoaded && _interstitialAd != null) {
+      if (_isAdLoaded && _interstitialAd != true) {
         _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
           onAdDismissedFullScreenContent: (InterstitialAd ad) {
             // Navigasi ke GetStart setelah menutup iklan
