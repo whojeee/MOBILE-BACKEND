@@ -18,12 +18,13 @@ import 'package:tugaskelompok/Pages/NewEvent.dart';
 import 'package:tugaskelompok/Drawer.dart';
 
 void main() {
+
   //mengecek apakah tampilan loading/Get Start bisa berjalan dengan baik
   testWidgets('Testing', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: GetStart(),
     ));
-
+    
     expect(find.text('Next'), findsOneWidget);
 
     await tester.tap(find.text('Next'));
@@ -41,12 +42,18 @@ void main() {
         ),
       ),
     ));
-
+    //ketika loading tekan Icon menu untuk tampilkan drawer
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
+    //melihat apakah jika login sebagai test@example.com akan muncul nama tersebut di drawer atau tidak
+    expect(find.text('test@example.com'), findsOneWidget);
+
+    //memastikan bahwa terdapat menu menu yang sesuai
     expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Logout'), findsOneWidget);
     expect(find.text('Profiles'), findsNothing);
+    expect(find.text('Login'), findsNothing);
   });
 
   //mengecek apakah ketika create event text input sudah sesuai atau belum
@@ -57,6 +64,7 @@ void main() {
       ),
     ));
 
+    //melihat apakah pada menu Add Event sudah sesuai atau belum
     expect(find.text('Event Name'), findsOneWidget);
     expect(find.text('Event Description'), findsOneWidget);
     expect(find.text('Selected Date'), findsOneWidget);
@@ -64,4 +72,5 @@ void main() {
     expect(find.text('Create Event'), findsOneWidget);
     expect(find.text('Event Event'), findsNothing);
   });
+
 }

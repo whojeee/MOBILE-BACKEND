@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class HomePage extends StatefulWidget {
-  final Function(bool) onPremiumStatusReceived; // Tambahkan properti ini
+  final Function(bool) onPremiumStatusReceived; 
 
   HomePage({Key? key, required this.onPremiumStatusReceived}) : super(key: key);
 
@@ -215,7 +215,6 @@ class _HomePageState extends State<HomePage> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
   bool isPremium = false;
-
   bool isUserPremium = false;
 
   StreamController<bool> _premiumStatusStreamController =
@@ -228,7 +227,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
     _loadPremiumStatus();
     _loadEvents();
     DatabaseHelper.instance.eventCountStream.listen((count) {
@@ -253,12 +251,14 @@ class _HomePageState extends State<HomePage> {
 
           setState(() {
             isUserPremium = userData['premium'] ?? false;
+            print('Premium status loaded: $isUserPremium');
             _premiumStatusStreamController.add(isUserPremium);
           });
 
           // Hanya inisialisasi iklan jika pengguna bukan premium
           if (!isUserPremium) {
             _initAdMob();
+            _initInterstitialAd(isUserPremium);
           }
 
           // Kirim status premium ke LoadingPage
@@ -288,7 +288,6 @@ class _HomePageState extends State<HomePage> {
         ),
       );
       _bannerAd!.load();
-      _initInterstitialAd(isUserPremium);
     }
   }
 
@@ -303,6 +302,7 @@ class _HomePageState extends State<HomePage> {
               _interstitialAd = ad;
               _isInterstitialAdLoaded = true;
             });
+          _showInterstitialAd(isUserPremium);
           },
           onAdFailedToLoad: (LoadAdError error) {
             print('InterstitialAd failed to load: $error');
@@ -312,31 +312,29 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _showInterstitialAd(bool isPremium) {
-    // Tampilkan interstitial ad hanya jika pengguna bukan premium
-    if (!isPremium) {
-      if (_isAdLoaded && _interstitialAd != true) {
-        _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
-          onAdDismissedFullScreenContent: (InterstitialAd ad) {
-            // Navigasi ke GetStart setelah menutup iklan
-            _navigateToGetStart();
-          },
-          onAdFailedToShowFullScreenContent:
-              (InterstitialAd ad, AdError error) {
-            // Navigasi ke GetStart jika gagal menampilkan iklan
-            _navigateToGetStart();
-          },
-          onAdShowedFullScreenContent: (InterstitialAd ad) {
-            // Iklan ditampilkan, Anda dapat melakukan tindakan apa pun di sini
-          },
-        );
-        _interstitialAd.show();
-      } else {
-        // Jika iklan gagal dimuat atau tidak diinisialisasi, navigasi ke GetStart segera
-        _navigateToGetStart();
-      }
+void _showInterstitialAd(bool isPremium) {
+  // Tampilkan interstitial ad hanya jika pengguna bukan premium
+  if (!isPremium) {
+    if (_isInterstitialAdLoaded && _interstitialAd != true) {
+      _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (InterstitialAd ad) {
+          _isInterstitialAdLoaded = true;
+        },
+        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+          // Handle the case when the ad fails to show.
+        },
+        onAdShowedFullScreenContent: (InterstitialAd ad) {
+          _isInterstitialAdLoaded = true;
+        },
+      );
+      _interstitialAd.show();
+    } else {
+      // Jika iklan gagal dimuat atau tidak diinisialisasi, tidak melakukan navigasi
+      return;
     }
   }
+}
+
 
   Widget _buildAd() {
     if (isUserPremium || !_isAdLoaded) {

@@ -25,54 +25,20 @@ class _LoadingPageState extends State<LoadingPage> {
   _LoadingPageState({required this.isPremiumUser});
 
   late InterstitialAd _interstitialAd;
-  bool _isAdLoaded = false;
+  bool _isAdLoaded = true;
 
   Future<void> _delayedNavigation() async {
     await Future.delayed(Duration(seconds: 2));
-    _showInterstitialAd(widget.isPremiumUser);
-  }
-
-  Future<void> _checkPremiumStatus() async {
-    try {
-      final User? user = await AuthFirebase().getUser();
-
-      if (user != null) {
-        final String userUid = user.uid;
-        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('profile')
-            .doc(userUid)
-            .get();
-
-        if (userDoc.exists) {
-          final Map<String, dynamic> userData =
-              userDoc.data() as Map<String, dynamic>;
-
-          final bool isPremium = userData['premium'] ?? false;
-
-          _showInterstitialAd(isPremium);
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MyHomePage(
-                  title: 'Planner App',
-                  email: user.email,
-                  isPremiumUser: isPremium),
-            ),
-          );
-        }
-      }
-    } catch (error) {
-      print('Error checking premium status: $error');
-    }
+    // _showInterstitialAd(widget.isPremiumUser);
   }
 
   @override
   void initState() {
     super.initState();
-    _loadInterstitialAd();
+    // _loadInterstitialAd();
     _delayedNavigation().then((_) {
-      _showInterstitialAd(isPremiumUser);
+      // _showInterstitialAd(isPremiumUser);
+      _navigateToGetStart();
     });
   }
 
@@ -106,28 +72,28 @@ class _LoadingPageState extends State<LoadingPage> {
 
   void _showInterstitialAd(bool isPremium) {
     // Tampilkan interstitial ad hanya jika pengguna bukan premium
-    if (!isPremium) {
-      if (_isAdLoaded && _interstitialAd != true) {
-        _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
-          onAdDismissedFullScreenContent: (InterstitialAd ad) {
-            // Navigasi ke GetStart setelah menutup iklan
-            _navigateToGetStart();
-          },
-          onAdFailedToShowFullScreenContent:
-              (InterstitialAd ad, AdError error) {
-            // Navigasi ke GetStart jika gagal menampilkan iklan
-            _navigateToGetStart();
-          },
-          onAdShowedFullScreenContent: (InterstitialAd ad) {
-            // Iklan ditampilkan, Anda dapat melakukan tindakan apa pun di sini
-          },
-        );
-        _interstitialAd.show();
-      } else {
+    // if (!isPremium) {
+      // if (_isAdLoaded && _interstitialAd != true) {
+      //   _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
+      //     onAdDismissedFullScreenContent: (InterstitialAd ad) {
+      //       // Navigasi ke GetStart setelah menutup iklan
+      //       _navigateToGetStart();
+      //     },
+      //     onAdFailedToShowFullScreenContent:
+      //         (InterstitialAd ad, AdError error) {
+      //       // Navigasi ke GetStart jika gagal menampilkan iklan
+      //       _navigateToGetStart();
+      //     },
+      //     onAdShowedFullScreenContent: (InterstitialAd ad) {
+      //       // Iklan ditampilkan, Anda dapat melakukan tindakan apa pun di sini
+      //     },
+      //   );
+      //   _interstitialAd.show();
+      // } else {
         // Jika iklan gagal dimuat atau tidak diinisialisasi, navigasi ke GetStart segera
         _navigateToGetStart();
-      }
-    }
+      // }
+    // }
   }
 
   void _navigateToGetStart() {
