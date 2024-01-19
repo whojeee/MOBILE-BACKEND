@@ -57,11 +57,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
           setState(() {
             _usernameController.text = userData['username'];
-            _profilePictureController.text = userData['profilePicture'];
             _descriptionController.text = userData['description'];
             _statusController.text = userData['status'];
             _isPremium = userData['premium'] ?? false;
             ProfilePage.isPremium = _isPremium;
+            if (_image == null) {
+              _profilePictureUrl = userData['profilePicture'];
+            }
           });
           _showInterstitialAd();
         }
@@ -131,66 +133,83 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'.i18n()),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/home', (route) => false);
+            },
+            icon: Icon(Icons.arrow_back)),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'.i18n()),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              controller: _profilePictureController,
-              decoration:
-                  InputDecoration(labelText: 'Profile-Picture-URL'.i18n()),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _isUpdating ? null : () => _pickImage(),
-              child: Text('Pick Image'),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'.i18n()),
-              maxLines: 3,
-            ),
-            SizedBox(height: 16.0),
-            DropdownButton<String>(
-              value: _selectedStatus,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedStatus = newValue!;
-                });
-              },
-              items: <String>['Active', 'Inactive', 'On Hold']
-                  .map<DropdownMenuItem<String>>(
-                    (String value) => DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    ),
-                  )
-                  .toList(),
-              hint: Text('Status'.i18n()),
-            ),
-            CheckboxListTile(
-              title: Text('Premium User'),
-              value: _isPremium,
-              onChanged: (bool? value) {
-                setState(() {
-                  _isPremium = value ?? false;
-                });
-              },
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _isUpdating ? null : () => _updateUserData(),
-              child: Text('Update-Profile'.i18n()),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.grey,
+                child: ClipOval(
+                  child: _image != null
+                      ? Image.file(_image!,
+                          fit: BoxFit.cover, width: 100, height: 100)
+                      : (_profilePictureUrl != null &&
+                              _profilePictureUrl!.isNotEmpty)
+                          ? Image.network(_profilePictureUrl!,
+                              fit: BoxFit.cover, width: 100, height: 100)
+                          : Icon(Icons.person, size: 50, color: Colors.white),
+                ),
+              ),
+              SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _isUpdating ? null : () => _pickImage(),
+                child: Text('Pick Image'),
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(labelText: 'Username'.i18n()),
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                controller: _descriptionController,
+                decoration: InputDecoration(labelText: 'Description'.i18n()),
+                maxLines: 3,
+              ),
+              SizedBox(height: 16.0),
+              DropdownButton<String>(
+                value: _selectedStatus,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedStatus = newValue!;
+                  });
+                },
+                items: <String>['Active', 'Inactive', 'On Hold']
+                    .map<DropdownMenuItem<String>>(
+                      (String value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      ),
+                    )
+                    .toList(),
+                hint: Text('Status'.i18n()),
+              ),
+              CheckboxListTile(
+                title: Text('Premium User'),
+                value: _isPremium,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _isPremium = value ?? false;
+                  });
+                },
+              ),
+              SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _isUpdating ? null : () => _updateUserData(),
+                child: Text('Update-Profile'.i18n()),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -75,6 +75,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/home': (_) => MyHomePage(
+            title: "Daily-Minder".i18n(), isPremiumUser: isPremiumUser)
+      },
       home: LoadingPage(
         isPremiumUser: isPremiumUser,
       ),

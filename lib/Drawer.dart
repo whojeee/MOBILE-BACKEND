@@ -1,7 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:tugaskelompok/Pages/Auth/auth.dart';
+import 'package:tugaskelompok/Tools/Model/user.dart';
 import 'Pages/Auth/Profile.dart';
 import 'package:localization/localization.dart';
 
@@ -18,6 +23,37 @@ class MyDrawer extends StatefulWidget {
 
 class _MyDrawerState extends State<MyDrawer> {
   File? _image;
+  String? _profilePictureUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfilePictureUrl();
+  }
+
+  Future<void> _loadProfilePictureUrl() async {
+    try {
+      final user = await AuthFirebase().getUser();
+
+      if (user != null) {
+        final String userUid = user.uid;
+        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('profile')
+            .doc(userUid)
+            .get();
+
+        if (userDoc.exists) {
+          final Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
+          setState(() {
+            _profilePictureUrl = userData['profilePicture'] ?? '';
+          });
+        }
+      }
+    } catch (error) {
+      print('Error loading profile picture URL: $error');
+    }
+  }
 
   // Function to request permission
   Future<void> _requestGalleryPermission() async {
@@ -31,16 +67,24 @@ class _MyDrawerState extends State<MyDrawer> {
     }
   }
 
-  Future getImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  // Future getImage() async {
+  //   final picker = ImagePicker();
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
-    });
-  }
+  //   setState(() async {
+  //     if (pickedFile != null) {
+  //       _image = File(pickedFile.path);
+
+  //       // Upload the new image to Firestore and get the URL
+  //       String profilePictureUrl = await uploadImageToFirestore(_image!);
+
+  //       // Update the _profilePictureUrl
+  //       setState(() {
+  //         _profilePictureUrl = profilePictureUrl;
+  //       });
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -54,20 +98,21 @@ class _MyDrawerState extends State<MyDrawer> {
             currentAccountPicture: GestureDetector(
               onTap: () {
                 _requestGalleryPermission(); // Request permission when profile picture is tapped
-                getImage(); // Call getImage() function when the profile picture is tapped
+                // getImage(); // Call getImage() function when the profile picture is tapped
               },
               child: CircleAvatar(
                 backgroundColor: Colors.white,
-                child: _image != null
-                    ? ClipOval(
-                        child: Image.file(
-                          _image!,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Icon(Icons.person, size: 48),
+                child:
+                    _profilePictureUrl != null && _profilePictureUrl!.isNotEmpty
+                        ? ClipOval(
+                            child: Image.network(
+                              _profilePictureUrl!,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Icon(Icons.person, size: 48),
               ),
             ),
           ),
