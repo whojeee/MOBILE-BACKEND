@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
-import 'package:tugaskelompok/main.dart';
-import 'globals.dart' as globals;
 
 class NewEventPage extends StatefulWidget {
   final Function(EventModel) onNewEventAdded; // Tambahkan ini

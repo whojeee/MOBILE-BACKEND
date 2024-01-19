@@ -6,8 +6,6 @@ import 'package:tugaskelompok/Pages/Auth/auth.dart';
 import 'package:tugaskelompok/Pages/GetStart.dart';
 import 'package:tugaskelompok/main.dart';
 
-import 'Auth/Profile.dart';
-
 void main() => runApp(MaterialApp(
       home: LoadingPage(isPremiumUser: true),
     ));

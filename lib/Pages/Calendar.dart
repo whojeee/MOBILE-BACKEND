@@ -10,21 +10,22 @@ class MyData {
   final String information;
   final String day;
   final String holidayDate;
+  final String? eventName;
 
-  MyData({
-    required this.id,
-    required this.information,
-    required this.day,
-    required this.holidayDate,
-  });
+  MyData(
+      {required this.id,
+      required this.information,
+      required this.day,
+      required this.holidayDate,
+      this.eventName});
 
   factory MyData.fromJson(Map<String, dynamic> json) {
     return MyData(
-      id: json['id'],
-      information: json['information'],
-      day: json['day'],
-      holidayDate: json['holiday_date'],
-    );
+        id: json['id'],
+        information: json['information'],
+        day: json['day'],
+        holidayDate: json['holiday_date'],
+        eventName: json['event_name']);
   }
 }
 
@@ -53,24 +54,25 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
-  String getEventText() {
-    if (_selectedDay != null) {
-      final selectedDate =
-          "${_selectedDay!.year}-${_selectedDay!.month.toString().padLeft(2, '0')}-${_selectedDay!.day.toString().padLeft(2, '0')}";
+  String getHolidayName(DateTime selectedDay) {
+    final selectedDate =
+        "${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}";
 
-      final eventData = events.firstWhere(
-        (data) => data.eventDate == selectedDate,
-        orElse: () => EventModel(
-          eventName: "Tidak Ada Kegiatan",
-          eventDescription: "",
-          eventDate: selectedDate,
-          isChecked: false,
-        ),
-      );
+    final holidayDataItem = holidayData.firstWhere(
+      (data) => data.holidayDate == selectedDate,
+      orElse: () => MyData(
+        id: 0,
+        information: "Tidak ada kegiatan",
+        day: "",
+        holidayDate: selectedDate,
+      ),
+    );
 
-      return eventData.eventName;
+    final eventName = holidayDataItem.eventName;
+    if (eventName != null && eventName.isNotEmpty) {
+      return '$eventName\n${holidayDataItem.information}';
     } else {
-      return "";
+      return holidayDataItem.information;
     }
   }
 
@@ -176,28 +178,36 @@ class _CalendarPageState extends State<CalendarPage> {
       height: 170,
       child: ListTile(
         leading: Icon(Icons.calendar_today),
-        title: Text(getEventText()),
+        title: Text(getHolidayName(_selectedDay ?? DateTime.now())),
       ),
     );
   }
 
   Future<void> _getEventsForSelectedDay(DateTime selectedDay) async {
-    final selectedDate =
-        "${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}";
+    try {
+      final selectedDate =
+          "${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}";
 
-    final eventData = events.firstWhere(
-      (data) => data.eventDate == selectedDate,
-      orElse: () => EventModel(
-        eventName: "Tidak Ada Kegiatan",
-        eventDescription: "",
-        eventDate: selectedDate,
-        isChecked: false,
-      ),
-    );
+      print('Selected Date: $selectedDate');
 
-    setState(() {
-      events = [eventData];
-    });
+      final eventData = events.firstWhere(
+        (data) => data.eventDate == selectedDate,
+        orElse: () => EventModel(
+          eventName: "Tidak Ada Kegiatan",
+          eventDescription: "",
+          eventDate: selectedDate,
+          isChecked: false,
+        ),
+      );
+
+      print('Event Data: $eventData');
+
+      setState(() {
+        events = [eventData];
+      });
+    } catch (error) {
+      print('Error getting events for selected day: $error');
+    }
   }
 
   void _loadEvents() async {
