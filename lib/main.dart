@@ -13,11 +13,13 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
+import 'package:tugaskelompok/Tools/Model/AdsStart.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:localization/localization.dart  ';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
@@ -223,10 +225,12 @@ class _HomePageState extends State<HomePage> {
 
   late InterstitialAd _interstitialAd;
   bool _isInterstitialAdLoaded = false;
+  bool shouldShowInterstitialAd = true;
 
   @override
   void initState() {
     super.initState();
+    checkOnboardingStatus();
     _loadPremiumStatus();
     _loadEvents();
     DatabaseHelper.instance.eventCountStream.listen((count) {
@@ -235,6 +239,7 @@ class _HomePageState extends State<HomePage> {
       });
     });
   }
+
 
   Future<void> _loadPremiumStatus() async {
     try {
@@ -267,6 +272,26 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (error) {
       print('Error loading premium status: $error');
+    }
+  }
+
+  void checkOnboardingStatus() async {
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    bool hasCompletedOnboarding = _pref.getBool(AdsStore.everCome) ?? true;
+
+    print("HasCompletedOnBoarding");
+    print(hasCompletedOnboarding);
+    if (hasCompletedOnboarding) {
+    print("berhasil");
+      shouldShowInterstitialAd = false;
+      SharedPreferences _pref = await SharedPreferences.getInstance();
+      _pref.setBool(AdsStore.everCome, false);
+    }
+    else{
+    print("yah ini deh");
+      SharedPreferences _pref = await SharedPreferences.getInstance();
+      _pref.setBool(AdsStore.everCome, true);
+      shouldShowInterstitialAd = true;
     }
   }
 
@@ -313,19 +338,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showInterstitialAd(bool isPremium) {
-    // Tampilkan interstitial ad hanya jika pengguna bukan premium
+    print(isPremium);
     if (!isPremium) {
-      if (_isInterstitialAdLoaded && _interstitialAd != true) {
+      print(_isInterstitialAdLoaded);
+      print(shouldShowInterstitialAd);
+      if (_isInterstitialAdLoaded && shouldShowInterstitialAd) {
+        print("berhasil");
         _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
           onAdDismissedFullScreenContent: (InterstitialAd ad) {
-            _isInterstitialAdLoaded = true;
+            setState(() {
+              _isInterstitialAdLoaded = false;
+
+            });
           },
-          onAdFailedToShowFullScreenContent:
-              (InterstitialAd ad, AdError error) {
-            // Handle the case when the ad fails to show.
+          onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error)  {
+            setState(() {
+              _isInterstitialAdLoaded = false;
+
+            });
           },
-          onAdShowedFullScreenContent: (InterstitialAd ad) {
-            _isInterstitialAdLoaded = true;
+          onAdShowedFullScreenContent: (InterstitialAd ad)  {
+            _isInterstitialAdLoaded = false;
+
           },
         );
         _interstitialAd.show();
