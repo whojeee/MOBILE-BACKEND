@@ -24,7 +24,7 @@ class _LoadingPageState extends State<LoadingPage> {
   final bool isPremiumUser;
   _LoadingPageState({required this.isPremiumUser});
 
-  late InterstitialAd _interstitialAd;
+  InterstitialAd? _interstitialAd;
   bool _isAdLoaded = true;
 
   Future<void> _delayedNavigation() async {
@@ -35,7 +35,7 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   void initState() {
     super.initState();
-    // _loadInterstitialAd();
+    _loadInterstitialAd();
     _delayedNavigation().then((_) {
       // _showInterstitialAd(isPremiumUser);
       _navigateToGetStart();
@@ -44,7 +44,10 @@ class _LoadingPageState extends State<LoadingPage> {
 
   @override
   void dispose() {
-    _interstitialAd.dispose();
+    // Pengecekan sebelum memanggil dispose
+    if (_interstitialAd != null) {
+      _interstitialAd!.dispose();
+    }
     super.dispose();
   }
 
@@ -71,28 +74,25 @@ class _LoadingPageState extends State<LoadingPage> {
   }
 
   void _showInterstitialAd(bool isPremium) {
-    // Tampilkan interstitial ad hanya jika pengguna bukan premium
-    // if (!isPremium) {
-      // if (_isAdLoaded && _interstitialAd != true) {
-      //   _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
-      //     onAdDismissedFullScreenContent: (InterstitialAd ad) {
-      //       // Navigasi ke GetStart setelah menutup iklan
-      //       _navigateToGetStart();
-      //     },
-      //     onAdFailedToShowFullScreenContent:
-      //         (InterstitialAd ad, AdError error) {
-      //       // Navigasi ke GetStart jika gagal menampilkan iklan
-      //       _navigateToGetStart();
-      //     },
-      //     onAdShowedFullScreenContent: (InterstitialAd ad) {
-      //       // Iklan ditampilkan, Anda dapat melakukan tindakan apa pun di sini
-      //     },
-      //   );
-      //   _interstitialAd.show();
-      // } else {
-        // Jika iklan gagal dimuat atau tidak diinisialisasi, navigasi ke GetStart segera
-        _navigateToGetStart();
-      // }
+    // Tampilkan interstitial ad hanya jika pengguna bukan premium dan iklan sudah dimuat
+    // if (!isPremium && _isAdLoaded && _interstitialAd != null) {
+    //   _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+    //     onAdDismissedFullScreenContent: (InterstitialAd ad) {
+    //       // Navigasi ke GetStart setelah menutup iklan
+    //       _navigateToGetStart();
+    //     },
+    //     onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+    //       // Navigasi ke GetStart jika gagal menampilkan iklan
+    //       _navigateToGetStart();
+    //     },
+    //     onAdShowedFullScreenContent: (InterstitialAd ad) {
+    //       // Iklan ditampilkan, Anda dapat melakukan tindakan apa pun di sini
+    //     },
+    //   );
+    //   _interstitialAd!.show();
+    // } else {
+    // Jika iklan gagal dimuat atau tidak diinisialisasi, navigasi ke GetStart segera
+    _navigateToGetStart();
     // }
   }
 

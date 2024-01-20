@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class HomePage extends StatefulWidget {
-  final Function(bool) onPremiumStatusReceived; 
+  final Function(bool) onPremiumStatusReceived;
 
   HomePage({Key? key, required this.onPremiumStatusReceived}) : super(key: key);
 
@@ -302,7 +302,7 @@ class _HomePageState extends State<HomePage> {
               _interstitialAd = ad;
               _isInterstitialAdLoaded = true;
             });
-          _showInterstitialAd(isUserPremium);
+            _showInterstitialAd(isUserPremium);
           },
           onAdFailedToLoad: (LoadAdError error) {
             print('InterstitialAd failed to load: $error');
@@ -312,29 +312,29 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-void _showInterstitialAd(bool isPremium) {
-  // Tampilkan interstitial ad hanya jika pengguna bukan premium
-  if (!isPremium) {
-    if (_isInterstitialAdLoaded && _interstitialAd != true) {
-      _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
-        onAdDismissedFullScreenContent: (InterstitialAd ad) {
-          _isInterstitialAdLoaded = true;
-        },
-        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-          // Handle the case when the ad fails to show.
-        },
-        onAdShowedFullScreenContent: (InterstitialAd ad) {
-          _isInterstitialAdLoaded = true;
-        },
-      );
-      _interstitialAd.show();
-    } else {
-      // Jika iklan gagal dimuat atau tidak diinisialisasi, tidak melakukan navigasi
-      return;
+  void _showInterstitialAd(bool isPremium) {
+    // Tampilkan interstitial ad hanya jika pengguna bukan premium
+    if (!isPremium) {
+      if (_isInterstitialAdLoaded && _interstitialAd != true) {
+        _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
+          onAdDismissedFullScreenContent: (InterstitialAd ad) {
+            _isInterstitialAdLoaded = true;
+          },
+          onAdFailedToShowFullScreenContent:
+              (InterstitialAd ad, AdError error) {
+            // Handle the case when the ad fails to show.
+          },
+          onAdShowedFullScreenContent: (InterstitialAd ad) {
+            _isInterstitialAdLoaded = true;
+          },
+        );
+        _interstitialAd.show();
+      } else {
+        // Jika iklan gagal dimuat atau tidak diinisialisasi, tidak melakukan navigasi
+        return;
+      }
     }
   }
-}
-
 
   Widget _buildAd() {
     if (isUserPremium || !_isAdLoaded) {
@@ -461,9 +461,9 @@ void _showInterstitialAd(bool isPremium) {
   }
 
   void _handleCheckboxChanged(int index, bool value) async {
-    print('Checkbox changed :$index,$value');
+    print('Checkbox changed: $index, $value');
 
-    if (value && events[index].id != null) {
+    if (value && index < events.length && events[index].id != null) {
       print("Deleting event with ID: ${events[index].id}");
 
       // Hapus event dari database
@@ -506,11 +506,15 @@ void _showInterstitialAd(bool isPremium) {
       }
 
       events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+      _isNewEventAdded = true;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isNewEventAdded) {
+      _isNewEventAdded = false;
+    }
     events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     return Scaffold(
       body: SingleChildScrollView(
