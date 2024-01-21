@@ -26,6 +26,21 @@ class _EditEventPageState extends State<EditEventPage> {
     _selectedDate = DateTime.parse(widget.initialEvent.eventDate);
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,43 +60,42 @@ class _EditEventPageState extends State<EditEventPage> {
               controller: _eventDescriptionController,
               decoration: InputDecoration(labelText: 'Event Description'),
             ),
-            InkWell(
-              onTap: () async {
-                final pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2101),
-                );
-
-                if (pickedDate != null && pickedDate != _selectedDate) {
-                  setState(() {
-                    _selectedDate = pickedDate;
-                  });
-                }
-              },
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_today),
-                  SizedBox(width: 8),
-                  Text(
-                    'Select Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
-                  ),
-                ],
+            TextField(
+              controller: TextEditingController(
+                text: DateFormat('yyyy-MM-dd').format(_selectedDate),
+              ),
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Select Date',
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    _selectDate(context);
+                  },
+                  icon: Icon(Icons.calendar_today),
+                ),
               ),
             ),
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                EventModel updatedEvent = EventModel(
-                  id: widget.initialEvent.id,
-                  eventName: _eventNameController.text,
-                  eventDescription: _eventDescriptionController.text,
-                  eventDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
-                  isChecked: widget.initialEvent.isChecked,
-                );
+                if (_eventNameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Event Name cannot be empty!'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                } else {
+                  EventModel updatedEvent = EventModel(
+                    id: widget.initialEvent.id,
+                    eventName: _eventNameController.text,
+                    eventDescription: _eventDescriptionController.text,
+                    eventDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
+                    isChecked: widget.initialEvent.isChecked,
+                  );
 
-                Navigator.pop(context, updatedEvent);
+                  Navigator.pop(context, updatedEvent);
+                }
               },
               child: Text('Save Changes'),
             ),
