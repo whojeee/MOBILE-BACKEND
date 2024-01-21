@@ -3,6 +3,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:tugaskelompok/Pages/Auth/Login.dart';
 import 'package:tugaskelompok/Pages/Auth/Profile.dart';
 import 'package:tugaskelompok/Pages/Auth/auth.dart';
+import 'package:tugaskelompok/Pages/EditEvent.dart';
 import 'package:tugaskelompok/Pages/GetStart.dart';
 import 'package:tugaskelompok/Pages/NewEvent.dart';
 import 'package:tugaskelompok/Pages/Loading.dart';
@@ -38,7 +39,6 @@ void main() async {
 Future<void> requestPermission() async {
   var status = await Permission.storage.status;
   if (!status.isGranted) {
-    // If permission is not granted, request it
     await Permission.storage.request();
   }
 }
@@ -240,7 +240,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-
   Future<void> _loadPremiumStatus() async {
     try {
       final User? user = await AuthFirebase().getUser();
@@ -260,13 +259,11 @@ class _HomePageState extends State<HomePage> {
             _premiumStatusStreamController.add(isUserPremium);
           });
 
-          // Hanya inisialisasi iklan jika pengguna bukan premium
           if (!isUserPremium) {
             _initAdMob();
             _initInterstitialAd(isUserPremium);
           }
 
-          // Kirim status premium ke LoadingPage
           widget.onPremiumStatusReceived(isUserPremium);
         }
       }
@@ -282,13 +279,12 @@ class _HomePageState extends State<HomePage> {
     print("HasCompletedOnBoarding");
     print(hasCompletedOnboarding);
     if (hasCompletedOnboarding) {
-    print("berhasil");
+      print("berhasil");
       shouldShowInterstitialAd = false;
       SharedPreferences _pref = await SharedPreferences.getInstance();
       _pref.setBool(AdsStore.everCome, false);
-    }
-    else{
-    print("yah ini deh");
+    } else {
+      print("yah ini deh");
       SharedPreferences _pref = await SharedPreferences.getInstance();
       _pref.setBool(AdsStore.everCome, true);
       shouldShowInterstitialAd = true;
@@ -348,23 +344,20 @@ class _HomePageState extends State<HomePage> {
           onAdDismissedFullScreenContent: (InterstitialAd ad) {
             setState(() {
               _isInterstitialAdLoaded = false;
-
             });
           },
-          onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error)  {
+          onAdFailedToShowFullScreenContent:
+              (InterstitialAd ad, AdError error) {
             setState(() {
               _isInterstitialAdLoaded = false;
-
             });
           },
-          onAdShowedFullScreenContent: (InterstitialAd ad)  {
+          onAdShowedFullScreenContent: (InterstitialAd ad) {
             _isInterstitialAdLoaded = false;
-
           },
         );
         _interstitialAd.show();
       } else {
-        // Jika iklan gagal dimuat atau tidak diinisialisasi, tidak melakukan navigasi
         return;
       }
     }
@@ -372,8 +365,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildAd() {
     if (isUserPremium || !_isAdLoaded) {
-      return SizedBox
-          .shrink(); // Sembunyikan iklan untuk pengguna premium atau jika belum dimuat
+      return SizedBox.shrink();
     } else {
       return Container(
         alignment: Alignment.bottomCenter,
@@ -388,7 +380,7 @@ class _HomePageState extends State<HomePage> {
     DatabaseHelper.instance.eventCountStream.listen((count) {
       setState(() {
         eventCount = count;
-        notificationSink.add(count); // Mengirim jumlah notifikasi ke stream
+        notificationSink.add(count);
       });
     });
   }
@@ -406,6 +398,27 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _handleEditButton(EventModel event) async {
+    final updatedEvent = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditEventPage(
+          initialEvent: event,
+        ),
+      ),
+    );
+
+    if (updatedEvent != null) {
+      await DatabaseHelper.instance.updateEvent(updatedEvent.toMap());
+      setState(() {
+        events.removeWhere((e) => e.id == event.id);
+        events.add(updatedEvent);
+        events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+        DatabaseHelper.instance.updateEventCount();
+      });
+    }
+  }
+
   Widget _buildBody() {
     return events == null || events.isEmpty
         ? Center(child: Text('No-events-available'.i18n()))
@@ -417,59 +430,62 @@ class _HomePageState extends State<HomePage> {
               String formattedDate = DateFormat('EEEE, d - MM - y')
                   .format(DateTime.parse(events[index].eventDate));
 
-              return events[index].isChecked
-                  ? SizedBox.shrink()
-                  : Card(
-                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: events[index].isChecked,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  _handleCheckboxChanged(index, value!);
-                                });
-                              },
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+              return GestureDetector(
+                onTap: () {
+                  _handleEditButton(events[index]);
+                },
+                child: Card(
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: events[index].isChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _handleCheckboxChanged(index, value!);
+                            });
+                          },
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        events[index].eventName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Text(
-                                        formattedDate,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 4),
                                   Text(
-                                    events[index].eventDescription,
-                                    style: TextStyle(fontSize: 14),
+                                    events[index].eventName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    formattedDate,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 4),
+                              Text(
+                                events[index].eventDescription,
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
+                      ],
+                    ),
+                  ),
+                ),
+              );
             },
           );
   }
@@ -500,15 +516,11 @@ class _HomePageState extends State<HomePage> {
     if (value && index < events.length && events[index].id != null) {
       print("Deleting event with ID: ${events[index].id}");
 
-      // Hapus event dari database
       await DatabaseHelper.instance.deleteEvent(events[index].id!);
 
-      // Update jumlah notifikasi
       DatabaseHelper.instance.updateEventCount();
 
-      // Jika checkbox status premium dicentang
       if (index == 0) {
-        // Update status premium di Firestore
         final User? user = await AuthFirebase().getUser();
         if (user != null) {
           final String userUid = user.uid;
@@ -519,23 +531,19 @@ class _HomePageState extends State<HomePage> {
             'premium': true,
           });
 
-          // Nonaktifkan iklan karena pengguna sekarang menjadi premium
           setState(() {
             isPremium = true;
           });
 
-          // Mengirim status premium ke ProfilePage
           ProfilePage.isPremium = true;
         }
       }
     }
 
-    // Lakukan pembaruan state di dalam blok setState
     setState(() {
       events[index].isChecked = value;
 
       if (value) {
-        // Hapus event dari list jika checkbox dicentang
         events.removeAt(index);
       }
 
@@ -577,10 +585,8 @@ class _HomePageState extends State<HomePage> {
       events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     });
 
-    // Update jumlah notifikasi
     DatabaseHelper.instance.updateEventCount();
 
-    // Panggil _loadEvents() untuk memastikan daftar event diperbarui
     await _loadEvents();
   }
 

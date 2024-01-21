@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -77,7 +76,6 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       setState(() {
         _isUpdating = true;
-        // Update the static variable when premium status changes
         ProfilePage.isPremium = _isPremium;
       });
 
@@ -86,23 +84,19 @@ class _ProfilePageState extends State<ProfilePage> {
       if (user != null) {
         final String userUid = user.uid;
 
-        // Check if there is a new image to upload
         if (_image != null) {
-          // Upload the image to Firebase Storage
           String imagePath = 'profilePictures/$userUid/${DateTime.now()}.png';
           TaskSnapshot task = await _storage.ref(imagePath).putFile(_image!);
 
-          // Get the download URL of the uploaded image
           _profilePictureUrl = await task.ref.getDownloadURL();
         }
 
-        // Update user data in Firestore with the profile picture URL
         await _firestore.collection('profile').doc(userUid).set({
           'username': _usernameController.text,
           'description': _descriptionController.text,
           'status': _selectedStatus,
           'premium': _isPremium,
-          'profilePicture': _profilePictureUrl, // Update with the image URL
+          'profilePicture': _profilePictureUrl,
           'email': _currentUser.email,
         });
         print('User data updated successfully!');

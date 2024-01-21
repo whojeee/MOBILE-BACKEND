@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:tugaskelompok/Tools/Model/user.dart'; // Import your user model
+import 'package:tugaskelompok/Tools/Model/user.dart';
 
 class UserProvider extends ChangeNotifier {
   List<User> _users = [];
@@ -16,6 +16,4 @@ class UserProvider extends ChangeNotifier {
     _users.removeWhere((user) => user.id == id);
     notifyListeners();
   }
-
-  // Implement other methods to update and fetch users
 }

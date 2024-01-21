@@ -44,15 +44,20 @@ class AuthFirebase {
         password: password,
       );
 
-    String userUid = userCredential.user!.uid;
-    final DocumentSnapshot userDoc =
-        await FirebaseFirestore.instance.collection('profile').doc(userUid).get();
+      String userUid = userCredential.user!.uid;
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('profile')
+          .doc(userUid)
+          .get();
 
-    if (!userDoc.exists) {
-      await FirebaseFirestore.instance.collection('profile').doc(userUid).set({
-        'userId': userUid,
-      });
-    }
+      if (!userDoc.exists) {
+        await FirebaseFirestore.instance
+            .collection('profile')
+            .doc(userUid)
+            .set({
+          'userId': userUid,
+        });
+      }
 
       return userCredential;
     } catch (e) {

@@ -86,7 +86,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
   void fetchData() async {
     try {
-      final apiUrl = 'https://kasekiru.com/api/liburan/oG37i2GyVq64zRGI';
+      final apiUrl = "https://kasekiru.com/api/liburan/JeiaFN39De20Snra";
+
       final response = await http.get(Uri.parse(apiUrl));
 
       if (response.statusCode == 200) {
@@ -114,7 +115,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
   void fetchData2() async {
     try {
-      final apiUrl = "https://kasekiru.com/api/liburan/JeiaFN39De20Snra";
+      final apiUrl = 'https://kasekiru.com/api/liburan/oG37i2GyVq64zRGI';
+
       final response = await http.get(Uri.parse(apiUrl));
 
       if (response.statusCode == 200) {

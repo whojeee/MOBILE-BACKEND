@@ -69,43 +69,42 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-Future<String?> _loginUser(LoginData data) async {
-  final result = await auth.login(data.name, data.password);
-  if (result != null) {
-    await auth.getUserDetails().then((details) {
-      if (details != null) {
-        setState(() {
-          userEmail = details['email'];
-        });
-      }
-    });
+  Future<String?> _loginUser(LoginData data) async {
+    final result = await auth.login(data.name, data.password);
+    if (result != null) {
+      await auth.getUserDetails().then((details) {
+        if (details != null) {
+          setState(() {
+            userEmail = details['email'];
+          });
+        }
+      });
 
-    bool isUserPremium = true; // Set the premium status based on your logic
+      bool isUserPremium = true; // Set the premium status based on your logic
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MyHomePage(
-          title: "Daily-Minder".i18n(),
-          email: userEmail,
-          isPremiumUser: isUserPremium,
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyHomePage(
+            title: "Daily-Minder".i18n(),
+            email: userEmail,
+            isPremiumUser: isUserPremium,
+          ),
         ),
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Failed-Login".i18n()),
-        action: SnackBarAction(
-          label: "OK",
-          onPressed: () {},
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed-Login".i18n()),
+          action: SnackBarAction(
+            label: "OK",
+            onPressed: () {},
+          ),
         ),
-      ),
-    );
+      );
+    }
+    return "Gagal melakukan login"; // Mengembalikan pesan kesalahan
   }
-  return "Gagal melakukan login"; // Mengembalikan pesan kesalahan
-}
-
 
   Future<String>? _recoverPassword(String name) {
     return null;

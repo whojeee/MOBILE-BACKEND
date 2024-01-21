@@ -1,13 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:tugaskelompok/Pages/Auth/auth.dart';
 import 'package:tugaskelompok/Pages/GetStart.dart';
-import 'package:tugaskelompok/main.dart';
 import 'package:tugaskelompok/Tools/Model/AdsStart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 void main() => runApp(MaterialApp(
       home: LoadingPage(isPremiumUser: true),
@@ -32,7 +27,6 @@ class _LoadingPageState extends State<LoadingPage> {
 
   Future<void> _delayedNavigation() async {
     await Future.delayed(Duration(seconds: 2));
-    // _showInterstitialAd(widget.isPremiumUser);
   }
 
   @override
@@ -41,14 +35,12 @@ class _LoadingPageState extends State<LoadingPage> {
     _sharedpref();
     _loadInterstitialAd();
     _delayedNavigation().then((_) {
-      // _showInterstitialAd(isPremiumUser);
       _navigateToGetStart();
     });
   }
 
   @override
   void dispose() {
-    // Pengecekan sebelum memanggil dispose
     if (_interstitialAd != null) {
       _interstitialAd!.dispose();
     }
@@ -66,7 +58,6 @@ class _LoadingPageState extends State<LoadingPage> {
             _isAdLoaded = true;
           });
 
-          // Move the call to showInterstitialAd here
           _showInterstitialAd(isPremiumUser);
         },
         onAdFailedToLoad: (LoadAdError error) {
@@ -77,31 +68,12 @@ class _LoadingPageState extends State<LoadingPage> {
     );
   }
 
-  void _sharedpref() async{
+  void _sharedpref() async {
     SharedPreferences _pref = await SharedPreferences.getInstance();
     _pref.setBool(AdsStore.everCome, true);
   }
 
   void _showInterstitialAd(bool isPremium) {
-    // Tampilkan interstitial ad hanya jika pengguna bukan premium dan iklan sudah dimuat
-    // if (!isPremium && _isAdLoaded && _interstitialAd != null) {
-    //   _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-    //     onAdDismissedFullScreenContent: (InterstitialAd ad) {
-    //       // Navigasi ke GetStart setelah menutup iklan
-    //       _navigateToGetStart();
-    //     },
-    //     onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-    //       // Navigasi ke GetStart jika gagal menampilkan iklan
-    //       _navigateToGetStart();
-    //     },
-    //     onAdShowedFullScreenContent: (InterstitialAd ad) {
-    //       // Iklan ditampilkan, Anda dapat melakukan tindakan apa pun di sini
-    //     },
-    //   );
-    //   _interstitialAd!.show();
-    // } else {
-    // Jika iklan gagal dimuat atau tidak diinisialisasi, navigasi ke GetStart segera
-
     _navigateToGetStart();
     // }
   }
