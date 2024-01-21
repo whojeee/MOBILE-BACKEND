@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:tugaskelompok/Pages/get_start.dart';
-import 'package:tugaskelompok/Tools/Model/AdsStart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tugaskelompok/Tools/Model/ads_start.dart';
 
 void main() => runApp(MaterialApp(
       home: LoadingPage(isPremiumUser: true),
@@ -23,7 +23,6 @@ class _LoadingPageState extends State<LoadingPage> {
   _LoadingPageState({required this.isPremiumUser});
 
   InterstitialAd? _interstitialAd;
-  bool _isAdLoaded = true;
 
   Future<void> _delayedNavigation() async {
     await Future.delayed(Duration(seconds: 2));
@@ -55,7 +54,6 @@ class _LoadingPageState extends State<LoadingPage> {
         onAdLoaded: (InterstitialAd ad) {
           setState(() {
             _interstitialAd = ad;
-            _isAdLoaded = true;
           });
 
           _showInterstitialAd(isPremiumUser);

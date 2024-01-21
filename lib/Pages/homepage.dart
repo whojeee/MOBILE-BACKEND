@@ -10,7 +10,7 @@ import 'package:tugaskelompok/Pages/Auth/auth.dart';
 import 'package:tugaskelompok/Pages/edit_event.dart';
 import 'package:tugaskelompok/Pages/new_event.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
-import 'package:tugaskelompok/Tools/Model/AdsStart.dart';
+import 'package:tugaskelompok/Tools/Model/ads_start.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
 class HomePage extends StatefulWidget {
