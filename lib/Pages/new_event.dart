@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
@@ -6,7 +8,7 @@ import 'package:tugaskelompok/Tools/Model/event_model.dart';
 class NewEventPage extends StatefulWidget {
   final Function(EventModel) onNewEventAdded; // Tambahkan ini
 
-  NewEventPage({required this.onNewEventAdded});
+  const NewEventPage({super.key, required this.onNewEventAdded});
   @override
   _NewEventPageState createState() => _NewEventPageState();
 }
@@ -28,7 +30,7 @@ class _NewEventPageState extends State<NewEventPage> {
     super.initState();
   }
 
-  void _addEvent(BuildContext context) {
+  void _addEvent(BuildContext context) async {
     try {
       final eventName = eventNameController.text;
       final eventDescription = eventDescriptionController.text;
@@ -42,14 +44,30 @@ class _NewEventPageState extends State<NewEventPage> {
         throw 'Please fill in the event name';
       }
 
+      User? user = FirebaseAuth.instance.currentUser;
+      print('Current User: $user');
+
+      if (user == null) {
+        throw 'User not authenticated';
+      }
+
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('profile')
+          .doc(user.uid)
+          .get();
+      final Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
+      String userEmail = userData['email'];
+      print('User Email: $userEmail');
+
       final event = EventModel(
         eventName: eventName,
         eventDescription: eventDescription,
         eventDate: eventDate,
+        createdBy: userEmail,
         isChecked: false,
       );
 
-      // Debug print for checking event details
       print('Event Details: $event');
 
       DatabaseHelper.instance.insertEvent(event.toMap());
@@ -57,7 +75,6 @@ class _NewEventPageState extends State<NewEventPage> {
 
       print('Event added successfully');
 
-      // Gunakan Navigator.pop untuk kembali ke halaman sebelumnya
       Navigator.pop(context);
       print('Navigating back to the previous page');
     } catch (error) {
@@ -88,7 +105,7 @@ class _NewEventPageState extends State<NewEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('New Event'),
+        title: const Text('New Event'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -96,14 +113,14 @@ class _NewEventPageState extends State<NewEventPage> {
           children: [
             TextField(
               controller: eventNameController,
-              decoration: InputDecoration(labelText: 'Event Name'),
+              decoration: const InputDecoration(labelText: 'Event Name'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: eventDescriptionController,
-              decoration: InputDecoration(labelText: 'Event Description'),
+              decoration: const InputDecoration(labelText: 'Event Description'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: selectedDayController,
               readOnly: true,
@@ -113,17 +130,17 @@ class _NewEventPageState extends State<NewEventPage> {
                   onPressed: () {
                     _selectDate(context);
                   },
-                  icon: Icon(Icons.calendar_today),
+                  icon: const Icon(Icons.calendar_today),
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 print('Create Event button pressed');
                 _addEvent(context);
               },
-              child: Text('Create Event'),
+              child: const Text('Create Event'),
             ),
           ],
         ),

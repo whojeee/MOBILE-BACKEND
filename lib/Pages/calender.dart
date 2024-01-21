@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:http/http.dart' as http;
@@ -30,6 +31,8 @@ class MyData {
 }
 
 class CalendarPage extends StatefulWidget {
+  const CalendarPage({super.key});
+
   @override
   _CalendarPageState createState() => _CalendarPageState();
 }
@@ -89,7 +92,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   void fetchData() async {
     try {
-      final apiUrl = "https://kasekiru.com/api/liburan/JeiaFN39De20Snra";
+      const apiUrl = "https://kasekiru.com/api/liburan/JeiaFN39De20Snra";
 
       final response = await http.get(Uri.parse(apiUrl));
 
@@ -118,7 +121,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   void fetchData2() async {
     try {
-      final apiUrl = 'https://kasekiru.com/api/liburan/oG37i2GyVq64zRGI';
+      const apiUrl = 'https://kasekiru.com/api/liburan/oG37i2GyVq64zRGI';
 
       final response = await http.get(Uri.parse(apiUrl));
 
@@ -170,7 +173,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 _focusedDay = focusedDay;
               },
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,12 +209,9 @@ class _CalendarPageState extends State<CalendarPage> {
       return Container(); // Return an empty container if there is no holiday data
     }
     isKosong = false;
-    return Container(
-      // height: 170,
-      child: ListTile(
-        leading: Icon(Icons.calendar_today),
-        title: Text(getHolidayName(_selectedDay ?? DateTime.now())),
-      ),
+    return ListTile(
+      leading: const Icon(Icons.calendar_today),
+      title: Text(getHolidayName(_selectedDay ?? DateTime.now())),
     );
   }
 
@@ -222,24 +222,21 @@ class _CalendarPageState extends State<CalendarPage> {
         "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
 
     final eventsForSelectedDate = events.where((event) {
-      final eventDate = event.eventDate?.split('T')[0]; // Extract date part
+      final eventDate = event.eventDate.split('T')[0]; // Extract date part
       return eventDate == formattedSelectedDate;
     }).toList();
 
     if (eventsForSelectedDate.isEmpty) {
-      if(isKosong != true){
+      if (isKosong != true) {
         return Container();
       }
-      return Container(
-        // height: 170,
-        child: ListTile(
-          leading: Icon(Icons.calendar_today),
-          title: Text('No events for the selected date.'),
-        ),
+      return const ListTile(
+        leading: Icon(Icons.calendar_today),
+        title: Text('No events for the selected date.'),
       );
     }
 
-    return Container(
+    return SizedBox(
       height: 170,
       child: ListView.builder(
         shrinkWrap: true,
@@ -247,16 +244,15 @@ class _CalendarPageState extends State<CalendarPage> {
         itemBuilder: (context, index) {
           final event = eventsForSelectedDate[index];
           return ListTile(
-            leading: Icon(Icons.calendar_today),
-            title: Text(event.eventName ?? 'No Event Name'),
-            subtitle: Text(event.eventDescription ?? ''),
+            leading: const Icon(Icons.calendar_today),
+            title: Text(event.eventName),
+            subtitle: Text(event.eventDescription),
             // You can customize the display as needed
           );
         },
       ),
     );
   }
-
 
   Future<void> _getEventsForSelectedDay(DateTime selectedDay) async {
     try {
@@ -271,6 +267,7 @@ class _CalendarPageState extends State<CalendarPage> {
           eventName: "Tidak Ada Kegiatan",
           eventDescription: "",
           eventDate: selectedDate,
+          createdBy: "",
           isChecked: false,
         ),
       );
@@ -286,9 +283,17 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void _loadEvents() async {
-    final eventsData = await DatabaseHelper.instance.queryAllEvents();
-    setState(() {
-      events = eventsData;
-    });
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // Retrieve the user's email
+      String userEmail = user.email ?? "";
+
+      final eventsData =
+          await DatabaseHelper.instance.queryAllEvents(userEmail);
+      setState(() {
+        events = eventsData;
+      });
+    }
   }
 }

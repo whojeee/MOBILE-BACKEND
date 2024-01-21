@@ -5,7 +5,7 @@ import 'package:tugaskelompok/Tools/Model/event_model.dart';
 class EditEventPage extends StatefulWidget {
   final EventModel initialEvent;
 
-  EditEventPage({required this.initialEvent});
+  const EditEventPage({required this.initialEvent});
 
   @override
   _EditEventPageState createState() => _EditEventPageState();
@@ -45,7 +45,7 @@ class _EditEventPageState extends State<EditEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Event'),
+        title: const Text('Edit Event'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,11 +54,11 @@ class _EditEventPageState extends State<EditEventPage> {
           children: [
             TextField(
               controller: _eventNameController,
-              decoration: InputDecoration(labelText: 'Event Name'),
+              decoration: const InputDecoration(labelText: 'Event Name'),
             ),
             TextField(
               controller: _eventDescriptionController,
-              decoration: InputDecoration(labelText: 'Event Description'),
+              decoration: const InputDecoration(labelText: 'Event Description'),
             ),
             TextField(
               controller: TextEditingController(
@@ -71,33 +71,50 @@ class _EditEventPageState extends State<EditEventPage> {
                   onPressed: () {
                     _selectDate(context);
                   },
-                  icon: Icon(Icons.calendar_today),
+                  icon: const Icon(Icons.calendar_today),
                 ),
               ),
             ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (_eventNameController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Event Name cannot be empty!'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                } else {
-                  EventModel updatedEvent = EventModel(
-                    id: widget.initialEvent.id,
-                    eventName: _eventNameController.text,
-                    eventDescription: _eventDescriptionController.text,
-                    eventDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
-                    isChecked: widget.initialEvent.isChecked,
-                  );
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_eventNameController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Event Name cannot be empty!'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } else {
+                    EventModel updatedEvent = EventModel(
+                      id: widget.initialEvent.id,
+                      eventName: _eventNameController.text,
+                      eventDescription: _eventDescriptionController.text,
+                      eventDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
+                      createdBy: widget.initialEvent.createdBy,
+                      isChecked: widget.initialEvent.isChecked,
+                    );
 
-                  Navigator.pop(context, updatedEvent);
-                }
-              },
-              child: Text('Save Changes'),
+                    Navigator.pop(context, updatedEvent);
+                  }
+                },
+                child: const Text('Save Changes'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () {
+                  Navigator.pop(context, null);
+                },
+                child: const Text(
+                  'Delete Event',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ),
           ],
         ),

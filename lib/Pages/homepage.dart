@@ -16,7 +16,8 @@ import 'package:tugaskelompok/Tools/Model/event_model.dart';
 class HomePage extends StatefulWidget {
   final Function(bool) onPremiumStatusReceived;
 
-  const HomePage({Key? key, required this.onPremiumStatusReceived}) : super(key: key);
+  const HomePage({Key? key, required this.onPremiumStatusReceived})
+      : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -34,6 +35,10 @@ class _HomePageState extends State<HomePage> {
   Stream<int> get notificationStream => notificationStreamController.stream;
   Sink<int> get notificationSink => notificationStreamController.sink;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late User? user;
+  late String userUid;
+  late DocumentSnapshot userDoc;
+  late Map<String, dynamic> userData;
 
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
@@ -51,6 +56,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _setFirebaseVar();
     checkOnboardingStatus();
     _loadPremiumStatus();
     _loadEvents();
@@ -67,33 +73,29 @@ class _HomePageState extends State<HomePage> {
     notificationStreamController.close();
   }
 
+  Future<void> _setFirebaseVar() async {
+    user = await AuthFirebase().getUser();
+    userUid = user!.uid;
+    userDoc = await _firestore.collection('profile').doc(userUid).get();
+    if (userDoc.exists) {
+      userData = userDoc.data() as Map<String, dynamic>;
+    }
+  }
+
   Future<void> _loadPremiumStatus() async {
     try {
-      final User? user = await AuthFirebase().getUser();
+      setState(() {
+        isUserPremium = userData['premium'] ?? false;
+        print('Premium status loaded: $isUserPremium');
+        _premiumStatusStreamController.add(isUserPremium);
+      });
 
-      if (user != null) {
-        final String userUid = user.uid;
-        final DocumentSnapshot userDoc =
-            await _firestore.collection('profile').doc(userUid).get();
-
-        if (userDoc.exists) {
-          final Map<String, dynamic> userData =
-              userDoc.data() as Map<String, dynamic>;
-
-          setState(() {
-            isUserPremium = userData['premium'] ?? false;
-            print('Premium status loaded: $isUserPremium');
-            _premiumStatusStreamController.add(isUserPremium);
-          });
-
-          if (!isUserPremium) {
-            _initAdMob();
-            _initInterstitialAd(isUserPremium);
-          }
-
-          widget.onPremiumStatusReceived(isUserPremium);
-        }
+      if (!isUserPremium) {
+        _initAdMob();
+        _initInterstitialAd(isUserPremium);
       }
+
+      widget.onPremiumStatusReceived(isUserPremium);
     } catch (error) {
       print('Error loading premium status: $error');
     }
@@ -214,15 +216,25 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadEvents() async {
     if (mounted) {
-      final eventsData = await DatabaseHelper.instance.queryAllEvents();
-      print('loaded events : $eventsData');
-      if (eventsData != null && mounted) {
-        eventsData.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-        setState(() {
-          events = eventsData;
-          completedEvents = events.where((event) => event.isChecked).toList();
-          unfinishedEvents = events.where((event) => !event.isChecked).toList();
-        });
+      try {
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          String userEmail = user.email ?? "";
+          final eventsData =
+              await DatabaseHelper.instance.queryAllEvents(userEmail);
+          if (mounted) {
+            eventsData.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+            setState(() {
+              events = eventsData;
+              completedEvents =
+                  events.where((event) => event.isChecked).toList();
+              unfinishedEvents =
+                  events.where((event) => !event.isChecked).toList();
+            });
+          }
+        }
+      } catch (error) {
+        print('Error loading events: $error');
       }
     }
   }
@@ -243,8 +255,15 @@ class _HomePageState extends State<HomePage> {
         events.removeWhere((e) => e.id == event.id);
         events.add(updatedEvent);
         events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-        DatabaseHelper.instance.updateEventCount();
-        // Update completed and unfinished events lists
+        DatabaseHelper.instance.updateEventCount(userData['email']);
+        completedEvents = events.where((event) => event.isChecked).toList();
+        unfinishedEvents = events.where((event) => !event.isChecked).toList();
+      });
+    } else {
+      await DatabaseHelper.instance.deleteEvent(event.id!);
+      setState(() {
+        events.removeWhere((e) => e.id == event.id);
+        DatabaseHelper.instance.updateEventCount(userData['email']);
         completedEvents = events.where((event) => event.isChecked).toList();
         unfinishedEvents = events.where((event) => !event.isChecked).toList();
       });
@@ -257,11 +276,12 @@ class _HomePageState extends State<HomePage> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: body.length,
       itemBuilder: (context, index) {
+        final eventName = body[index];
         String formattedDate = DateFormat('EEEE, d - MM - y')
-            .format(DateTime.parse(body[index].eventDate));
+            .format(DateTime.parse(eventName.eventDate));
         return GestureDetector(
           onTap: () {
-            _handleEditButton(body[index]);
+            _handleEditButton(eventName);
           },
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -270,10 +290,10 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 children: [
                   Checkbox(
-                    value: body[index].isChecked,
+                    value: eventName.isChecked,
                     onChanged: (bool? value) {
                       setState(() {
-                        _handleCheckboxChanged(body, index, value!);
+                        _handleCheckboxChanged(eventName, eventName.id, value!);
                       });
                     },
                   ),
@@ -286,7 +306,7 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              body[index].eventName,
+                              eventName.eventName,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -303,7 +323,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          body[index].eventDescription,
+                          eventName.eventDescription,
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],
@@ -319,7 +339,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBody() {
-    if (events == null || events.isEmpty) {
+    if (events.isEmpty) {
       return Center(child: Text('No-events-available'.i18n()));
     } else {
       return completedEvents.isEmpty
@@ -350,72 +370,42 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         events.add(addedEvent);
         events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-        DatabaseHelper.instance.updateEventCount();
+        DatabaseHelper.instance.updateEventCount(userData['email']);
       });
     }
   }
 
-  void _handleCheckboxChanged(List eventList, int index, bool value) async {
-    if (mounted) {
+  void _handleCheckboxChanged(EventModel event, int id, bool value) async {
+    if (mounted && value) {
+      event.isChecked = value;
+      await _updateDatabase(event, id);
+
       setState(() {
-        eventList[index].isChecked = value;
-        if (value) {
-          completedEvents.add(eventList[index]);
-          unfinishedEvents.remove(eventList[index]);
-        } else {
-          unfinishedEvents.add(eventList[index]);
-          completedEvents.remove(eventList[index]);
-        }
-
+        completedEvents.add(event);
+        unfinishedEvents.remove(event);
         events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-        _isNewEventAdded = true;
+        completedEvents.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+        unfinishedEvents.sort((a, b) => a.eventDate.compareTo(b.eventDate));
       });
-      await _updateDatabase(eventList[index]);
+    } else {
+      event.isChecked = value;
+      await _updateDatabase(event, id);
+
+      setState(() {
+        unfinishedEvents.add(event);
+        completedEvents.remove(event);
+        events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+        completedEvents.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+        unfinishedEvents.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+      });
     }
   }
 
-  Future<void> _updateDatabase(EventModel updatedEvent) async {
+  Future<void> _updateDatabase(EventModel updatedEvent, int id) async {
     final Map<String, dynamic> eventMap = updatedEvent.toMap();
-    await DatabaseHelper.instance.updateEvent(eventMap);
-    await DatabaseHelper.instance.updateEventCount();
+    await DatabaseHelper.instance.updateEventChecked(id, eventMap);
+    await DatabaseHelper.instance.updateEventCount(userData['email']);
   }
-
-  // void _handleCheckboxChanged(int index, bool value) async {
-  //   print('Checkbox changed: $index, $value');
-
-  //   if (value && index < events.length && events[index].id != null) {
-  //     print("Deleting event with ID: ${events[index].id}");
-
-  //     await DatabaseHelper.instance.deleteEvent(events[index].id!);
-
-  //     DatabaseHelper.instance.updateEventCount();
-
-  //     if (index == 0) {
-  //       final User? user = await AuthFirebase().getUser();
-  //       if (user != null) {
-  //         final String userUid = user.uid;
-  //         await FirebaseFirestore.instance
-  //             .collection('profile')
-  //             .doc(userUid)
-  //             .update({
-  //           'premium': true,
-  //         });
-
-  //         setState(() {
-  //           isPremium = true;
-  //         });
-
-  //         ProfilePage.isPremium = true;
-  //       }
-  //     }
-  //   }
-
-  //   setState(() {
-  //     events[index].isChecked = value;
-  //     events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-  //     _isNewEventAdded = true;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -450,7 +440,7 @@ class _HomePageState extends State<HomePage> {
       events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     });
 
-    DatabaseHelper.instance.updateEventCount();
+    DatabaseHelper.instance.updateEventCount(userData['email']);
 
     await _loadEvents();
   }

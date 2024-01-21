@@ -9,25 +9,29 @@ class DatabaseHelper {
 
   static Database? _database;
 
-  StreamController<int> _eventCountController =
+  final StreamController<int> _eventCountController =
       StreamController<int>.broadcast();
   Stream<int> get eventCountStream => _eventCountController.stream;
   StreamController<int> _eventCountStreamController =
       StreamController<int>.broadcast();
+  bool _isEventCountStreamInitialized = false;
 
-  // Definisikan getter untuk stream
+  void initEventCountStream(String email) async {
+    if (!_isEventCountStreamInitialized) {
+      _eventCountStreamController = StreamController<int>();
+      try {
+        int eventCount = await fetchEventCountFromDatabase(email);
+        _eventCountStreamController.sink.add(eventCount);
 
-  void initEventCountStream() async {
-    try {
-      int eventCount = await fetchEventCountFromDatabase();
-      _eventCountStreamController.sink.add(eventCount);
+        // Listen for changes and update the main controller
+        _eventCountStreamController.stream.listen((count) {
+          _eventCountController.sink.add(count);
+        });
 
-      // Listen for changes and update the main controller
-      _eventCountStreamController.stream.listen((count) {
-        _eventCountController.sink.add(count);
-      });
-    } catch (e) {
-      print("Error initializing event count stream: $e");
+        _isEventCountStreamInitialized = true;
+      } catch (e) {
+        print("Error initializing event count stream: $e");
+      }
     }
   }
 
@@ -36,15 +40,14 @@ class DatabaseHelper {
     _eventCountStreamController.close();
   }
 
-  Future<int> fetchEventCountFromDatabase() async {
-    // Di sini Anda harus mengambil jumlah acara dari database
-    // Contoh sederhana: Mengembalikan jumlah acara dari database
-    return 10; // Misalnya, kembalikan jumlah acara dari database
-  }
+  Future<int> fetchEventCountFromDatabase(String email) async {
+    final db = await instance.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM events WHERE createdBy = ? AND isChecked = 0',
+      [email],
+    );
 
-  Future<void> updateEventCount() async {
-    final count = await queryEventCount();
-    _eventCountController.add(count);
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
   Future<Database> get database async {
@@ -60,13 +63,6 @@ class DatabaseHelper {
       version: 1,
       onCreate: _createDatabase,
     );
-  }
-
-  Future<List<EventModel>> queryCheckedEvents() async {
-    final db = await instance.database;
-    final result =
-        await db.query('events', where: 'isChecked = ?', whereArgs: [1]);
-    return result.map((e) => EventModel.fromMap(e)).toList();
   }
 
   Future<void> _createDatabase(Database db, int version) async {
@@ -87,9 +83,10 @@ class DatabaseHelper {
     return await db.insert('events', row);
   }
 
-  Future<List<EventModel>> queryAllEvents() async {
+  Future<List<EventModel>> queryAllEvents(String email) async {
     final db = await instance.database;
-    final result = await db.query('events');
+    final result =
+        await db.query('events', where: 'createdBy = ?', whereArgs: [email]);
     return result.map((e) => EventModel.fromMap(e)).toList();
   }
 
@@ -97,6 +94,27 @@ class DatabaseHelper {
     final db = await instance.database;
     final id = row['id'];
     return await db.update('events', row, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> updateEventChecked(int id, Map<String, dynamic> row) async {
+    try {
+      final db = await instance.database;
+      final int updatedRows =
+          await db.update('events', row, where: 'id = ?', whereArgs: [id]);
+      if (updatedRows > 0) {
+        // Only update the event count if the update was successful
+        await updateEventCount(row['createdBy']);
+      }
+      return updatedRows;
+    } catch (e) {
+      print('Error updating event: $e');
+      return 0;
+    }
+  }
+
+  Future<void> updateEventCount(String email) async {
+    final count = await fetchEventCountFromDatabase(email);
+    _eventCountController.add(count);
   }
 
   Future<int> queryEventCount() async {
@@ -109,6 +127,4 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete('events', where: 'id = ?', whereArgs: [id]);
   }
-
-  getEvents() {}
 }

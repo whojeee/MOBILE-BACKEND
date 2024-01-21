@@ -10,6 +10,8 @@ import 'package:localization/localization.dart';
 
 class ProfilePage extends StatefulWidget {
   static bool isPremium = false;
+
+  const ProfilePage({super.key});
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -132,7 +134,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Navigator.pushNamedAndRemoveUntil(
                   context, '/home', (route) => false);
             },
-            icon: Icon(Icons.arrow_back)),
+            icon: const Icon(Icons.arrow_back)),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -147,30 +149,29 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: _image != null
                       ? Image.file(_image!,
                           fit: BoxFit.cover, width: 100, height: 100)
-                      : (_profilePictureUrl != null &&
-                              _profilePictureUrl!.isNotEmpty)
-                          ? Image.network(_profilePictureUrl!,
+                      : (_profilePictureUrl.isNotEmpty)
+                          ? Image.network(_profilePictureUrl,
                               fit: BoxFit.cover, width: 100, height: 100)
-                          : Icon(Icons.person, size: 50, color: Colors.white),
+                          : const Icon(Icons.person, size: 50, color: Colors.white),
                 ),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _isUpdating ? null : () => _pickImage(),
-                child: Text('Pick Image'),
+                child: const Text('Pick Image'),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(labelText: 'Username'.i18n()),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(labelText: 'Description'.i18n()),
                 maxLines: 3,
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               DropdownButton<String>(
                 value: _selectedStatus,
                 onChanged: (String? newValue) {
@@ -189,7 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 hint: Text('Status'.i18n()),
               ),
               CheckboxListTile(
-                title: Text('Premium User'),
+                title: const Text('Premium User'),
                 value: _isPremium,
                 onChanged: (bool? value) {
                   setState(() {
@@ -197,7 +198,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   });
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _isUpdating ? null : () => _updateUserData(),
                 child: Text('Update-Profile'.i18n()),
