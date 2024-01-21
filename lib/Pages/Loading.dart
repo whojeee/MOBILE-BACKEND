@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:tugaskelompok/Pages/GetStart.dart';
+import 'package:tugaskelompok/Pages/get_start.dart';
 import 'package:tugaskelompok/Tools/Model/AdsStart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

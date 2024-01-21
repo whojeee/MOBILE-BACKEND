@@ -7,14 +7,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tugaskelompok/Pages/GetStart.dart';
+import 'package:tugaskelompok/Pages/get_start.dart';
 import 'package:tugaskelompok/main.dart';
 import 'package:localization/localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:tugaskelompok/Pages/NewEvent.dart';
+import 'package:tugaskelompok/Pages/new_event.dart';
 import 'package:tugaskelompok/Drawer.dart';
 
 void main() {

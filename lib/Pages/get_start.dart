@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tugaskelompok/Tools/Model/GetStart_FirstTime.dart';
-import 'package:tugaskelompok/main.dart';
-import 'package:tugaskelompok/Pages/Auth/Login.dart';
+import 'package:tugaskelompok/Pages/Auth/login_page.dart';
 import 'package:localization/localization.dart';
 
 class GetStart extends StatefulWidget {

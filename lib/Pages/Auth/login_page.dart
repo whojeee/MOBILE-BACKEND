@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tugaskelompok/Pages/Auth/auth.dart';
-import 'package:tugaskelompok/main.dart';
 import 'package:localization/localization.dart';
+import 'package:tugaskelompok/Pages/all_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
-
-  void _logout() {}
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -35,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MyHomePage(
+            builder: (context) => MainPage(
               title: "Daily-Minder".i18n(),
               email: userEmail,
               isPremiumUser: isUserPremium,
@@ -59,12 +56,6 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         }
       },
-      // loginProviders: <LoginProvider>[
-      //   LoginProvider(
-      //       icon: FontAwesomeIcons.google,
-      //       label: "Google",
-      //       callback: _onLoginGoogle)
-      // ],
       onSubmitAnimationCompleted: (() {}),
     );
   }
@@ -85,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MyHomePage(
+          builder: (context) => MainPage(
             title: "Daily-Minder".i18n(),
             email: userEmail,
             isPremiumUser: isUserPremium,
@@ -125,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MyHomePage(
+          builder: (context) => MainPage(
             title: "Daily-Minder".i18n(),
             email: userEmail,
             isPremiumUser: isUserPremium,
@@ -153,8 +144,4 @@ class _LoginScreenState extends State<LoginScreen> {
       MaterialPageRoute(builder: (context) => LoginScreen()),
     );
   }
-
-  // Future<String>? _onLoginGoogle() {
-  //   return null;
-  // }
 }

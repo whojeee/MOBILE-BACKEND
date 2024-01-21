@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tugaskelompok/Pages/Auth/auth.dart';
-import 'package:tugaskelompok/Pages/Calendar.dart';
-import 'Pages/Auth/Profile.dart';
+import 'package:tugaskelompok/Pages/calender.dart';
+import 'Pages/Auth/profile.dart';
 import 'package:localization/localization.dart';
 
 class MyDrawer extends StatefulWidget {
