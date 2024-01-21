@@ -206,6 +206,8 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
   int eventCount = 0;
   List<EventModel> events = [];
+  List<EventModel> completedEvents = [];
+  List<EventModel> unfinishedEvents = [];
   bool _isNewEventAdded = false;
   StreamController<int> notificationStreamController = StreamController<int>();
   Stream<int> get notificationStream => notificationStreamController.stream;
@@ -238,6 +240,12 @@ class _HomePageState extends State<HomePage> {
         eventCount = count;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    notificationStreamController.close();
   }
 
   Future<void> _loadPremiumStatus() async {
@@ -392,7 +400,9 @@ class _HomePageState extends State<HomePage> {
       if (eventsData != null && mounted) {
         eventsData.sort((a, b) => a.eventDate.compareTo(b.eventDate));
         setState(() {
-          this.events = eventsData;
+          events = eventsData;
+          completedEvents = events.where((event) => event.isChecked).toList();
+          unfinishedEvents = events.where((event) => !event.isChecked).toList();
         });
       }
     }
@@ -415,79 +425,93 @@ class _HomePageState extends State<HomePage> {
         events.add(updatedEvent);
         events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
         DatabaseHelper.instance.updateEventCount();
+        // Update completed and unfinished events lists
+        completedEvents = events.where((event) => event.isChecked).toList();
+        unfinishedEvents = events.where((event) => !event.isChecked).toList();
       });
     }
+  }
+
+  Widget _buildList(List body) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: body.length,
+      itemBuilder: (context, index) {
+        String formattedDate = DateFormat('EEEE, d - MM - y')
+            .format(DateTime.parse(body[index].eventDate));
+        return GestureDetector(
+          onTap: () {
+            _handleEditButton(body[index]);
+          },
+          child: Card(
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: body[index].isChecked,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _handleCheckboxChanged(body, index, value!);
+                      });
+                    },
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              body[index].eventName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              formattedDate,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          body[index].eventDescription,
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildBody() {
     return events == null || events.isEmpty
         ? Center(child: Text('No-events-available'.i18n()))
-        : ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: events.length,
-            itemBuilder: (context, index) {
-              String formattedDate = DateFormat('EEEE, d - MM - y')
-                  .format(DateTime.parse(events[index].eventDate));
-
-              return GestureDetector(
-                onTap: () {
-                  _handleEditButton(events[index]);
-                },
-                child: Card(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          value: events[index].isChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _handleCheckboxChanged(index, value!);
-                            });
-                          },
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    events[index].eventName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  Text(
-                                    formattedDate,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                events[index].eventDescription,
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+        : completedEvents.isEmpty
+            ? _buildList(unfinishedEvents)
+            : Column(
+                children: [
+                  _buildList(unfinishedEvents),
+                  Text("Done"),
+                  Divider(),
+                  _buildList(completedEvents),
+                ],
               );
-            },
-          );
   }
 
   void _handleAddButton() async {
@@ -510,47 +534,67 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _handleCheckboxChanged(int index, bool value) async {
-    print('Checkbox changed: $index, $value');
-
-    if (value && index < events.length && events[index].id != null) {
-      print("Deleting event with ID: ${events[index].id}");
-
-      await DatabaseHelper.instance.deleteEvent(events[index].id!);
-
-      DatabaseHelper.instance.updateEventCount();
-
-      if (index == 0) {
-        final User? user = await AuthFirebase().getUser();
-        if (user != null) {
-          final String userUid = user.uid;
-          await FirebaseFirestore.instance
-              .collection('profile')
-              .doc(userUid)
-              .update({
-            'premium': true,
-          });
-
-          setState(() {
-            isPremium = true;
-          });
-
-          ProfilePage.isPremium = true;
+  void _handleCheckboxChanged(List eventList, int index, bool value) async {
+    if (mounted) {
+      setState(() {
+        eventList[index].isChecked = value;
+        if (value) {
+          completedEvents.add(eventList[index]);
+          unfinishedEvents.remove(eventList[index]);
+        } else {
+          unfinishedEvents.add(eventList[index]);
+          completedEvents.remove(eventList[index]);
         }
-      }
+
+        events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+        _isNewEventAdded = true;
+      });
+      await _updateDatabase(eventList[index]);
     }
-
-    setState(() {
-      events[index].isChecked = value;
-
-      if (value) {
-        events.removeAt(index);
-      }
-
-      events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-      _isNewEventAdded = true;
-    });
   }
+
+  Future<void> _updateDatabase(EventModel updatedEvent) async {
+    final Map<String, dynamic> eventMap = updatedEvent.toMap();
+    await DatabaseHelper.instance.updateEvent(eventMap);
+    await DatabaseHelper.instance.updateEventCount();
+  }
+
+  // void _handleCheckboxChanged(int index, bool value) async {
+  //   print('Checkbox changed: $index, $value');
+
+  //   if (value && index < events.length && events[index].id != null) {
+  //     print("Deleting event with ID: ${events[index].id}");
+
+  //     await DatabaseHelper.instance.deleteEvent(events[index].id!);
+
+  //     DatabaseHelper.instance.updateEventCount();
+
+  //     if (index == 0) {
+  //       final User? user = await AuthFirebase().getUser();
+  //       if (user != null) {
+  //         final String userUid = user.uid;
+  //         await FirebaseFirestore.instance
+  //             .collection('profile')
+  //             .doc(userUid)
+  //             .update({
+  //           'premium': true,
+  //         });
+
+  //         setState(() {
+  //           isPremium = true;
+  //         });
+
+  //         ProfilePage.isPremium = true;
+  //       }
+  //     }
+  //   }
+
+  //   setState(() {
+  //     events[index].isChecked = value;
+  //     events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
+  //     _isNewEventAdded = true;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
