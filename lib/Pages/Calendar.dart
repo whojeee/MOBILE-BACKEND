@@ -41,6 +41,8 @@ class _CalendarPageState extends State<CalendarPage> {
   List<MyData> holidayData = [];
   List<EventModel> events = [];
 
+  bool isKosong = false;
+
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
       _selectedDay = selectedDay;
@@ -81,6 +83,7 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
     fetchData();
     fetchData2();
+    _showEvent();
     _loadEvents();
   }
 
@@ -167,8 +170,15 @@ class _CalendarPageState extends State<CalendarPage> {
                 _focusedDay = focusedDay;
               },
             ),
-            SizedBox(height: 20),
-            _buildEventText(),
+            SizedBox(height: 10),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildEventText(),
+                _showEvent(),
+              ],
+            )
           ],
         ),
       ),
@@ -176,14 +186,77 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Widget _buildEventText() {
+    DateTime selectedDate = _selectedDay ?? DateTime.now();
+
+    final formattedSelectedDate =
+        "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
+    final holidayDataItem = holidayData.firstWhere(
+      (data) => data.holidayDate == formattedSelectedDate,
+      orElse: () => MyData(
+        id: 0,
+        information: "Tidak ada kegiatan",
+        day: "",
+        holidayDate: formattedSelectedDate,
+      ),
+    );
+
+    if (holidayDataItem.information == "Tidak ada kegiatan") {
+      isKosong = true;
+      return Container(); // Return an empty container if there is no holiday data
+    }
+    isKosong = false;
     return Container(
-      height: 170,
+      // height: 170,
       child: ListTile(
         leading: Icon(Icons.calendar_today),
         title: Text(getHolidayName(_selectedDay ?? DateTime.now())),
       ),
     );
   }
+
+  Widget _showEvent() {
+    DateTime selectedDate = _selectedDay ?? DateTime.now();
+
+    final formattedSelectedDate =
+        "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
+    final eventsForSelectedDate = events.where((event) {
+      final eventDate = event.eventDate?.split('T')[0]; // Extract date part
+      return eventDate == formattedSelectedDate;
+    }).toList();
+
+    if (eventsForSelectedDate.isEmpty) {
+      if(isKosong != true){
+        return Container();
+      }
+      return Container(
+        // height: 170,
+        child: ListTile(
+          leading: Icon(Icons.calendar_today),
+          title: Text('No events for the selected date.'),
+        ),
+      );
+    }
+
+    return Container(
+      height: 170,
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: eventsForSelectedDate.length,
+        itemBuilder: (context, index) {
+          final event = eventsForSelectedDate[index];
+          return ListTile(
+            leading: Icon(Icons.calendar_today),
+            title: Text(event.eventName ?? 'No Event Name'),
+            subtitle: Text(event.eventDescription ?? ''),
+            // You can customize the display as needed
+          );
+        },
+      ),
+    );
+  }
+
 
   Future<void> _getEventsForSelectedDay(DateTime selectedDay) async {
     try {
