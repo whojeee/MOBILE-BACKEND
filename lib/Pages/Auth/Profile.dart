@@ -146,8 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text('Profile'.i18n()),
         leading: IconButton(
             onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/home', (route) => false);
+              Navigator.pop(context);
             },
             icon: const Icon(Icons.arrow_back)),
       ),

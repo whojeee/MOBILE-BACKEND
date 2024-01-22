@@ -58,7 +58,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _setFirebaseVar();
     checkOnboardingStatus();
-    _loadPremiumStatus();
     _loadEvents();
     DatabaseHelper.instance.eventCountStream.listen((count) {
       setState(() {
@@ -79,6 +78,7 @@ class _HomePageState extends State<HomePage> {
     userDoc = await _firestore.collection('profile').doc(userUid).get();
     if (userDoc.exists) {
       userData = userDoc.data() as Map<String, dynamic>;
+      _loadPremiumStatus();
     }
   }
 

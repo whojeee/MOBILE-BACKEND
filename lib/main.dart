@@ -53,8 +53,10 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       routes: {
-        '/home': (_) =>
-            MainPage(title: "Daily-Minder".i18n(), isPremiumUser: isPremiumUser)
+        '/home': (_) => MainPage(
+              title: "Daily-Minder".i18n(),
+              isPremiumUser: isPremiumUser,
+            )
       },
       home: LoadingPage(
         isPremiumUser: isPremiumUser,
