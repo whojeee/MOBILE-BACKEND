@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
 typedef DeleteEventCallback = void Function(EventModel event);
@@ -89,7 +90,7 @@ class _EditEventPageState extends State<EditEventPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_eventNameController.text.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -106,6 +107,13 @@ class _EditEventPageState extends State<EditEventPage> {
                             DateFormat('yyyy-MM-dd').format(_selectedDate),
                         createdBy: widget.initialEvent.createdBy,
                         isChecked: widget.initialEvent.isChecked,
+                      );
+                      final db = await DatabaseHelper.instance.database;
+                      await db.update(
+                        'events',
+                        updatedEvent.toMap(),
+                        where: 'id = ?',
+                        whereArgs: [updatedEvent.id],
                       );
 
                       Navigator.pop(context, updatedEvent);

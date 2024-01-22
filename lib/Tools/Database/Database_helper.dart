@@ -23,7 +23,6 @@ class DatabaseHelper {
         int eventCount = await fetchEventCountFromDatabase(email);
         _eventCountStreamController.sink.add(eventCount);
 
-        // Listen for changes and update the main controller
         _eventCountStreamController.stream.listen((count) {
           _eventCountController.sink.add(count);
         });
@@ -102,7 +101,6 @@ class DatabaseHelper {
       final int updatedRows =
           await db.update('events', row, where: 'id = ?', whereArgs: [id]);
       if (updatedRows > 0) {
-        // Only update the event count if the update was successful
         await updateEventCount(row['createdBy']);
       }
       return updatedRows;

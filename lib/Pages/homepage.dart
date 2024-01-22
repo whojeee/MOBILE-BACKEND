@@ -263,6 +263,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (updatedEvent != null) {
+      // Simpan perubahan pada database SQFlite
       await DatabaseHelper.instance.updateEvent(updatedEvent.toMap());
 
       setState(() {
