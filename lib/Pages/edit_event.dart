@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:tugaskelompok/Pages/homepage.dart';
-import 'path_to_home_page.dart';
-
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
@@ -54,7 +51,7 @@ class _EditEventPageState extends State<EditEventPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onBackPressed, // Handle back button press
+      onWillPop: _onBackPressed,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Edit Event'),
@@ -166,8 +163,6 @@ class _EditEventPageState extends State<EditEventPage> {
   }
 
   Future<bool> _onBackPressed() async {
-    // Handle back button press here
-    // Tidak melakukan apa-apa saat tombol kembali ditekan, hanya menutup halaman
     Navigator.pop(context);
     return false;
   }

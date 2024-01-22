@@ -50,7 +50,6 @@ class _MyDrawerState extends State<MyDrawer> {
     }
   }
 
-  // Function to request permission
   Future<void> _requestGalleryPermission() async {
     var status = await Permission.storage.request();
     if (status.isGranted) {

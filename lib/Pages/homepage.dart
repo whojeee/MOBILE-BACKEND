@@ -263,7 +263,6 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (updatedEvent != null) {
-      // Update the events list only if the returned value is not null
       await DatabaseHelper.instance.updateEvent(updatedEvent.toMap());
 
       setState(() {
@@ -278,7 +277,6 @@ class _HomePageState extends State<HomePage> {
         DatabaseHelper.instance.updateEventCount(userData['email']);
       });
     } else {
-      // Event deleted, refresh the events list
       await _loadEvents();
     }
   }
