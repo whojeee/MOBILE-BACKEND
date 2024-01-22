@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:localization/localization.dart';
@@ -38,9 +39,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+
     _profilePictureUrl = '';
     _currentUser = _auth.currentUser!;
     _loadUserData();
+    requestPermission();
   }
 
   Future<void> _loadUserData() async {
@@ -112,16 +115,28 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> requestPermission() async {
+    var status = await Permission.photos.status;
+    if (!status.isGranted) {
+      await Permission.photos.request();
+    }
+  }
 
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-        _profilePictureController.text = pickedFile.path;
-      }
-    });
+  Future<void> _pickImage() async {
+    final permissionStatus = await Permission.photos.request();
+    if (permissionStatus.isGranted) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      setState(() {
+        if (pickedFile != null) {
+          _image = File(pickedFile.path);
+          _profilePictureController.text = pickedFile.path;
+        }
+      });
+    } else {
+      print('Izin tidak diberikan untuk mengakses penyimpanan.');
+    }
   }
 
   @override
@@ -152,7 +167,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       : (_profilePictureUrl.isNotEmpty)
                           ? Image.network(_profilePictureUrl,
                               fit: BoxFit.cover, width: 100, height: 100)
-                          : const Icon(Icons.person, size: 50, color: Colors.white),
+                          : const Icon(Icons.person,
+                              size: 50, color: Colors.white),
                 ),
               ),
               const SizedBox(height: 16.0),
@@ -208,6 +224,43 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _requestPermission() async {
+    var status = await Permission.storage.request();
+    if (status.isGranted) {
+      // Izin diberikan, lanjutkan dengan operasi lain yang membutuhkan izin
+    } else if (!status.isPermanentlyDenied) {
+      // Tampilkan pesan bahwa izin diperlukan
+      print('Izin diperlukan untuk mengakses penyimpanan.');
+    } else {
+      // Izin tidak diberikan secara permanen, tampilkan opsi untuk membuka pengaturan
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Izin Diperlukan'),
+            content:
+                Text('Anda dapat membuka pengaturan untuk memberikan izin.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Batal'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Buka Pengaturan'),
+                onPressed: () {
+                  openAppSettings(); // Fungsi ini membuka pengaturan aplikasi
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }
 

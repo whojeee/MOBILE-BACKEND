@@ -12,20 +12,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await MobileAds.instance.initialize();
-  await requestPermission();
 
   bool isPremiumUser = false;
 
   runApp(MyApp(
     isPremiumUser: isPremiumUser,
   ));
-}
-
-Future<void> requestPermission() async {
-  var status = await Permission.storage.status;
-  if (!status.isGranted) {
-    await Permission.storage.request();
-  }
 }
 
 class MyApp extends StatelessWidget {

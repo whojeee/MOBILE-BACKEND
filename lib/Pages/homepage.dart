@@ -251,21 +251,35 @@ class _HomePageState extends State<HomePage> {
 
     if (updatedEvent != null) {
       await DatabaseHelper.instance.updateEvent(updatedEvent.toMap());
+
       setState(() {
+        // Remove the old event and add the updated one
         events.removeWhere((e) => e.id == event.id);
         events.add(updatedEvent);
+
+        // Sort the events based on the eventDate
         events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
-        DatabaseHelper.instance.updateEventCount(userData['email']);
+
+        // Update completed and unfinished events
         completedEvents = events.where((event) => event.isChecked).toList();
         unfinishedEvents = events.where((event) => !event.isChecked).toList();
+
+        // Update the event count
+        DatabaseHelper.instance.updateEventCount(userData['email']);
       });
     } else {
+      // Handle deletion if updatedEvent is null
       await DatabaseHelper.instance.deleteEvent(event.id!);
+
       setState(() {
         events.removeWhere((e) => e.id == event.id);
-        DatabaseHelper.instance.updateEventCount(userData['email']);
+
+        // Update completed and unfinished events
         completedEvents = events.where((event) => event.isChecked).toList();
         unfinishedEvents = events.where((event) => !event.isChecked).toList();
+
+        // Update the event count
+        DatabaseHelper.instance.updateEventCount(userData['email']);
       });
     }
   }
