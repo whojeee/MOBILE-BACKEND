@@ -6,7 +6,7 @@ import 'package:tugaskelompok/Tools/Database/Database_helper.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
 class NewEventPage extends StatefulWidget {
-  final Function(EventModel) onNewEventAdded; // Tambahkan ini
+  final Function(EventModel) onNewEventAdded;
 
   const NewEventPage({super.key, required this.onNewEventAdded});
   @override
@@ -56,7 +56,7 @@ class _NewEventPageState extends State<NewEventPage> {
           .doc(user.uid)
           .get();
       final Map<String, dynamic> userData =
-              userDoc.data() as Map<String, dynamic>;
+          userDoc.data() as Map<String, dynamic>;
       String userEmail = userData['email'];
       print('User Email: $userEmail');
 

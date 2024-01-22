@@ -239,48 +239,47 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _handleDeleteButton(EventModel event) async {
+    await DatabaseHelper.instance.deleteEvent(event.id!);
+
+    setState(() {
+      events.removeWhere((e) => e.id == event.id);
+      completedEvents.removeWhere((e) => e.id == event.id);
+      unfinishedEvents.removeWhere((e) => e.id == event.id);
+
+      DatabaseHelper.instance.updateEventCount(userData['email']);
+    });
+  }
+
   void _handleEditButton(EventModel event) async {
     final updatedEvent = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditEventPage(
           initialEvent: event,
+          onDelete: _handleDeleteButton,
         ),
       ),
     );
 
     if (updatedEvent != null) {
+      // Update the events list only if the returned value is not null
       await DatabaseHelper.instance.updateEvent(updatedEvent.toMap());
 
       setState(() {
-        // Remove the old event and add the updated one
         events.removeWhere((e) => e.id == event.id);
         events.add(updatedEvent);
 
-        // Sort the events based on the eventDate
         events.sort((a, b) => a.eventDate.compareTo(b.eventDate));
 
-        // Update completed and unfinished events
         completedEvents = events.where((event) => event.isChecked).toList();
         unfinishedEvents = events.where((event) => !event.isChecked).toList();
 
-        // Update the event count
         DatabaseHelper.instance.updateEventCount(userData['email']);
       });
     } else {
-      // Handle deletion if updatedEvent is null
-      await DatabaseHelper.instance.deleteEvent(event.id!);
-
-      setState(() {
-        events.removeWhere((e) => e.id == event.id);
-
-        // Update completed and unfinished events
-        completedEvents = events.where((event) => event.isChecked).toList();
-        unfinishedEvents = events.where((event) => !event.isChecked).toList();
-
-        // Update the event count
-        DatabaseHelper.instance.updateEventCount(userData['email']);
-      });
+      // Event deleted, refresh the events list
+      await _loadEvents();
     }
   }
 

@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       });
 
-      bool isUserPremium = true; // Set the premium status based on your logic
+      bool isUserPremium = true;
 
       Navigator.pushReplacement(
         context,
@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     }
-    return "Gagal melakukan login"; // Mengembalikan pesan kesalahan
+    return "Gagal melakukan login";
   }
 
   Future<String>? _recoverPassword(String name) {
@@ -134,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     }
-    return "Gagal melakukan signup"; // Mengembalikan pesan kesalahan
+    return "Gagal melakukan signup";
   }
 
   Future<void> _logout() async {

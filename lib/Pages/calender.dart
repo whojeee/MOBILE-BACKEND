@@ -206,7 +206,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
     if (holidayDataItem.information == "Tidak ada kegiatan") {
       isKosong = true;
-      return Container(); // Return an empty container if there is no holiday data
+      return Container();
     }
     isKosong = false;
     return ListTile(
@@ -222,7 +222,7 @@ class _CalendarPageState extends State<CalendarPage> {
         "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
 
     final eventsForSelectedDate = events.where((event) {
-      final eventDate = event.eventDate.split('T')[0]; // Extract date part
+      final eventDate = event.eventDate.split('T')[0];
       return eventDate == formattedSelectedDate;
     }).toList();
 
@@ -247,7 +247,6 @@ class _CalendarPageState extends State<CalendarPage> {
             leading: const Icon(Icons.calendar_today),
             title: Text(event.eventName),
             subtitle: Text(event.eventDescription),
-            // You can customize the display as needed
           );
         },
       ),
@@ -286,7 +285,6 @@ class _CalendarPageState extends State<CalendarPage> {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      // Retrieve the user's email
       String userEmail = user.email ?? "";
 
       final eventsData =

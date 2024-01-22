@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:tugaskelompok/Pages/homepage.dart';
+import 'path_to_home_page.dart';
+
 import 'package:intl/intl.dart';
 import 'package:tugaskelompok/Tools/Model/event_model.dart';
 
+typedef DeleteEventCallback = void Function(EventModel event);
+
 class EditEventPage extends StatefulWidget {
   final EventModel initialEvent;
+  final DeleteEventCallback onDelete;
 
-  const EditEventPage({required this.initialEvent});
+  const EditEventPage({
+    required this.initialEvent,
+    required this.onDelete,
+  });
 
   @override
   _EditEventPageState createState() => _EditEventPageState();
@@ -43,82 +53,122 @@ class _EditEventPageState extends State<EditEventPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Event'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _eventNameController,
-              decoration: const InputDecoration(labelText: 'Event Name'),
-            ),
-            TextField(
-              controller: _eventDescriptionController,
-              decoration: const InputDecoration(labelText: 'Event Description'),
-            ),
-            TextField(
-              controller: TextEditingController(
-                text: DateFormat('yyyy-MM-dd').format(_selectedDate),
+    return WillPopScope(
+      onWillPop: _onBackPressed, // Handle back button press
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Event'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _eventNameController,
+                decoration: const InputDecoration(labelText: 'Event Name'),
               ),
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: 'Select Date',
-                suffixIcon: IconButton(
+              TextField(
+                controller: _eventDescriptionController,
+                decoration:
+                    const InputDecoration(labelText: 'Event Description'),
+              ),
+              TextField(
+                controller: TextEditingController(
+                  text: DateFormat('yyyy-MM-dd').format(_selectedDate),
+                ),
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Select Date',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      _selectDate(context);
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: ElevatedButton(
                   onPressed: () {
-                    _selectDate(context);
-                  },
-                  icon: const Icon(Icons.calendar_today),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_eventNameController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Event Name cannot be empty!'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  } else {
-                    EventModel updatedEvent = EventModel(
-                      id: widget.initialEvent.id,
-                      eventName: _eventNameController.text,
-                      eventDescription: _eventDescriptionController.text,
-                      eventDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
-                      createdBy: widget.initialEvent.createdBy,
-                      isChecked: widget.initialEvent.isChecked,
-                    );
+                    if (_eventNameController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Event Name cannot be empty!'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } else {
+                      EventModel updatedEvent = EventModel(
+                        id: widget.initialEvent.id,
+                        eventName: _eventNameController.text,
+                        eventDescription: _eventDescriptionController.text,
+                        eventDate:
+                            DateFormat('yyyy-MM-dd').format(_selectedDate),
+                        createdBy: widget.initialEvent.createdBy,
+                        isChecked: widget.initialEvent.isChecked,
+                      );
 
-                    Navigator.pop(context, updatedEvent);
-                  }
-                },
-                child: const Text('Save Changes'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
-                  Navigator.pop(context, null);
-                },
-                child: const Text(
-                  'Delete Event',
-                  style: TextStyle(color: Colors.white),
+                      Navigator.pop(context, updatedEvent);
+                    }
+                  },
+                  child: const Text('Save Changes'),
                 ),
               ),
-            ),
-          ],
+              Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: ElevatedButton(
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    onPressed: () async {
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Delete Event'),
+                            content: const Text(
+                                'Are you sure you want to delete this event?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        widget.onDelete(widget.initialEvent);
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text(
+                      'Delete Event',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ))
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<bool> _onBackPressed() async {
+    // Handle back button press here
+    // Tidak melakukan apa-apa saat tombol kembali ditekan, hanya menutup halaman
+    Navigator.pop(context);
+    return false;
   }
 }

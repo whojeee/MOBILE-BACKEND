@@ -16,7 +16,6 @@ void checkOnboardingStatus(BuildContext context) async {
   bool hasCompletedOnboarding = _pref.getBool(KeyStore.pernahMasuk) ?? false;
 
   if (hasCompletedOnboarding) {
-    // If onboarding is completed, navigate to the main screen.
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -129,7 +128,6 @@ class _GetStartState extends State<GetStart> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  // builder: (context) => MyHomePage(title: "Daily Minder"),
                   builder: (context) => LoginScreen(),
                 ),
               );

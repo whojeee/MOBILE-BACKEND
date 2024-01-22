@@ -225,43 +225,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-  Future<void> _requestPermission() async {
-    var status = await Permission.storage.request();
-    if (status.isGranted) {
-      // Izin diberikan, lanjutkan dengan operasi lain yang membutuhkan izin
-    } else if (!status.isPermanentlyDenied) {
-      // Tampilkan pesan bahwa izin diperlukan
-      print('Izin diperlukan untuk mengakses penyimpanan.');
-    } else {
-      // Izin tidak diberikan secara permanen, tampilkan opsi untuk membuka pengaturan
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Izin Diperlukan'),
-            content:
-                Text('Anda dapat membuka pengaturan untuk memberikan izin.'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Batal'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: Text('Buka Pengaturan'),
-                onPressed: () {
-                  openAppSettings(); // Fungsi ini membuka pengaturan aplikasi
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
 }
 
 void _showInterstitialAd() {
